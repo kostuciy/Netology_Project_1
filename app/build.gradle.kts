@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.netologyproject1"
+    namespace = "ru.netology.nmedia"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "com.example.netologyproject1"
+        applicationId = "ru.netology.nmedia"
         minSdk = 23
         targetSdk = 33
         versionCode = 1

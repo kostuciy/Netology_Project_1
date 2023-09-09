@@ -1,4 +1,4 @@
-package com.example.netologyproject1
+package ru.netology.nmedia
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
