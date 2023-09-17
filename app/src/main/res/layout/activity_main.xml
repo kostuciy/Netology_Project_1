@@ -107,10 +107,8 @@
         android:gravity="center_vertical"
         android:text="@string/views_views_sample"
         app:layout_constraintBottom_toBottomOf="@+id/like"
-        app:layout_constraintHoriaontal_chainStyle="packed"
         app:layout_constraintStart_toEndOf="@id/like"
-        app:layout_constraintTop_toTopOf="@id/like"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toTopOf="@id/like" />
 
     <ImageView
         android:id="@+id/share"
@@ -123,7 +121,6 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toEndOf="@+id/like_text"
         app:layout_constraintTop_toTopOf="@+id/like"
-        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/baseline_arrow_outward_24" />
 
     <TextView
@@ -148,10 +145,9 @@
         android:singleLine="true"
         android:text="@string/views_views_sample"
         app:layout_constraintBottom_toBottomOf="@+id/views"
-        app:layout_constraintEnd_toEnd="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/views"
-        app:layout_constraintTop_toTopOf="@+id/views" />
+        app:layout_constraintTop_toTopOf="@id/views" />
 
     <ImageView
         android:id="@+id/views"
