@@ -2,4 +2,6 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="publisher_text_color">#2196F3</color>
+    <color name="date_text_color">#383838</color>
 </resources>

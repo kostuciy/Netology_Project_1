@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Netology Project 1</string>
     <string name="nmedia">NMedia</string>
+    <string name="post_publisher_sample" translatable="false">Нетология. Университет интернет-профессий</string>
+    <string name="post_date_sample" translatable="false">16 сентября в 13:24</string>
+    <string name="more_button_content_description" translatable="false">Показать больше</string>
+    <string name="post_text_sample" translatable="false">текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст</string>
+    <string name="views_views_sample" translatable="false">100K</string>
 </resources>
