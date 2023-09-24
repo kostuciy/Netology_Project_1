@@ -4,60 +4,32 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import ru.netology.nmedia.data_transfer_object.Post
 import ru.netology.nmedia.databinding.ActivityMainBinding
+import ru.netology.nmedia.viewmodel.PostViewModel
+import androidx.activity.viewModels
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private val postViewModel: PostViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        var testPost = Post(
-            0,
-            "Нетология",
-            "20 сентября 8:52",
-            "Текст текст текст",
-            999,
-            10999,
-            1_300_000,
-            false
-        )
-
-        updatePostView(binding, testPost)
+        postViewModel.postData.observe(this) { post ->
+            updatePostView(binding, post)
+        }
 
         binding.apply {
             like.setOnClickListener {
-                testPost = updateLikes(testPost)
-                updatePostView(binding, testPost)
+                postViewModel.updateLikes()
             }
 
             share.setOnClickListener {
-                testPost = updateShares(testPost)
-                updatePostView(binding, testPost)
-            }
-
-//            for tests
-            root.setOnClickListener {
-                println("tada")
+                postViewModel.updateShares()
             }
         }
     }
-
-    private fun updateLikes(post: Post): Post {
-        val newLikeAmount =
-            post.likes + if (!post.likedByMe) 1 else -1
-
-        return post.copy(
-            likes = newLikeAmount,
-            likedByMe = !post.likedByMe
-        )
-    }
-
-    private fun updateShares(post: Post) =
-        post.copy(
-            shares = post.shares + 1
-        )
 
     private fun updatePostView(binding: ActivityMainBinding, post: Post) {
         binding.apply {
