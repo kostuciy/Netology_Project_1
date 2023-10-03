@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         postViewModel.postData.observe(this) { postList ->
-            postAdapter.postList = postList
+            postAdapter.submitList(postList)
         }
     }
 }
