@@ -5,9 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.data_transfer_object.Post
 
 class PostRepositoryInMemoryImpl : PostRepository {
+    private var nextId = 4L // TODO: change to 1
     private var postList: List<Post> = mutableListOf(
         Post(
-            0,
+            1,
             "Нетология",
             "24 сентября в 9:27",
             "Тект текст текст текст текст текст",
@@ -17,7 +18,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             false
         ),
         Post(
-            1,
+            2,
             "Нетология",
             "26 сентября в 10:44",
             "Тект текст текст текст текст текст",
@@ -27,7 +28,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             false
         ),
         Post(
-            2,
+            3,
             "Нетология",
             "26 сентября в 10:44",
             "Тект текст текст текст текст текст",
@@ -41,6 +42,25 @@ class PostRepositoryInMemoryImpl : PostRepository {
     private val postData = MutableLiveData(postList)
 
     override fun getPostData(): LiveData<List<Post>> = postData
+
+
+    override fun savePost(post: Post) {
+        if (post.id == 0L) {
+            postList = listOf(
+                post.copy(
+                    id = nextId++,
+                    author = "Me",
+                    publishedDate = "Now"
+                )
+            ) + postList
+        } else {
+            postList = postList.map {
+                if (it.id != post.id) it
+                else it.copy(content = post.content)
+            }
+        }
+        postData.value = postList
+    }
 
     override fun updateLikesById(id: Long) {
         postList = postList.map { post ->
@@ -65,4 +85,8 @@ class PostRepositoryInMemoryImpl : PostRepository {
         postData.value = postList
     }
 
+    override fun removeById(id: Long) {
+        postList = postList.filter { post -> post.id != id }
+        postData.value = postList
+    }
 }

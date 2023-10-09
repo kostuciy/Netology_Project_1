@@ -2,6 +2,7 @@ package ru.netology.nmedia.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -11,16 +12,19 @@ import ru.netology.nmedia.databinding.CardPostBinding
 
 typealias onPostListener = (post: Post) -> Unit
 
-class PostAdapter(
-    private val onLikeListener: onPostListener,
-    private val onShareListener: onPostListener
-    ) :
+interface OnInteractionListener {
+    fun onLike(post: Post)
+    fun onShare(post: Post)
+    fun onEdit(post: Post)
+    fun onRemove(post: Post)
+}
+
+class PostAdapter(private val onInteractionListener: OnInteractionListener) :
     ListAdapter<Post, PostAdapter.PostViewHolder>(PostDiffCallback) {
 
     class PostViewHolder(
         private val binding: CardPostBinding,
-        private val onLikeListener: onPostListener,
-        private val onShareListener: onPostListener
+        private val onInteractionListener: OnInteractionListener
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bindData(post: Post) {
             binding.apply {
@@ -37,11 +41,30 @@ class PostAdapter(
                         else R.drawable.baseline_favorite_border_24
                     )
                     setOnClickListener {
-                        onLikeListener(post)
+                        onInteractionListener.onLike(post)
                     }
                 }
                 share.setOnClickListener {
-                    onShareListener(post)
+                    onInteractionListener.onShare(post)
+                }
+
+                menu.setOnClickListener {
+                    PopupMenu(it.context, it).apply {
+                        inflate(R.menu.options_post)
+                        setOnMenuItemClickListener { menuItem ->
+                            when (menuItem.itemId) {
+                                R.id.removeItem -> {
+                                    onInteractionListener.onRemove(post)
+                                    true
+                                }
+                                R.id.editItem -> {
+                                    onInteractionListener.onEdit(post)
+                                    true
+                                }
+                                else -> false
+                            }
+                        }
+                    }.show()
                 }
             }
         }
@@ -74,7 +97,7 @@ class PostAdapter(
         val cardPostBinging  = CardPostBinding.inflate(
             LayoutInflater.from(parent.context), parent, false)
 
-        return PostViewHolder(cardPostBinging, onLikeListener, onShareListener)
+        return PostViewHolder(cardPostBinging, onInteractionListener)
     }
 
     override fun onBindViewHolder(postViewHolder: PostViewHolder, position: Int) {

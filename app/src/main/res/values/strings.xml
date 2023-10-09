@@ -6,4 +6,8 @@
     <string name="more_button_content_description" translatable="false">Показать больше</string>
     <string name="post_text_sample" translatable="false">текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст</string>
     <string name="views_views_sample" translatable="false">100K</string>
+    <string name="remove_option_text">Remove</string>
+    <string name="post_edit_text">Write something</string>
+    <string name="error_empty_content">No text written</string>
+    <string name="menu_edit_text">Edit</string>
 </resources>

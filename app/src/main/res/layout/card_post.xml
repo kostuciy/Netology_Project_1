@@ -8,7 +8,7 @@
     tools:context=".MainActivity">
 
     <ImageButton
-        android:id="@+id/more"
+        android:id="@+id/menu"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="@dimen/common_spacing"
@@ -29,7 +29,7 @@
         android:text="@string/post_publisher_sample"
         android:textColor="@color/publisher_text_color"
         app:layout_constraintBottom_toTopOf="@+id/date"
-        app:layout_constraintEnd_toStartOf="@+id/more"
+        app:layout_constraintEnd_toStartOf="@+id/menu"
         app:layout_constraintStart_toEndOf="@+id/avatar"
         app:layout_constraintTop_toTopOf="@+id/avatar"
         app:layout_constraintVertical_chainStyle="packed" />
