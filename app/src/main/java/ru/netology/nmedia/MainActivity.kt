@@ -72,6 +72,7 @@ class MainActivity : AppCompatActivity() {
             cancelEditButton.setOnClickListener {
                 hideEditTab(binding)
                 clearEditView(it)
+                postViewModel.setToNewPost()
             }
         }
 

@@ -34,6 +34,9 @@ class PostViewModel : ViewModel() {
     fun setToEdit(post: Post) {
         currentPost.value = post
     }
+    fun setToNewPost() {
+        currentPost.value = emptyPost
+    }
 
     fun changeContent(content: String) {
         currentPost.value?.let { post ->
