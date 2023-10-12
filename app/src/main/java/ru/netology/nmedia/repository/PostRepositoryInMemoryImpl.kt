@@ -14,7 +14,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             "Тект текст текст текст текст текст",
             999,
             1099,
-            5000,
+            2,
             false
         ),
         Post(
@@ -23,7 +23,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             "26 сентября в 10:44",
             "Тект текст текст текст текст текст",
             19,
-            2000,
+            2,
             60000,
             false
         ),
@@ -33,7 +33,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
             "26 сентября в 10:44",
             "Тект текст текст текст текст текст",
             19,
-            2000,
+            2500,
             60000,
             false
         )

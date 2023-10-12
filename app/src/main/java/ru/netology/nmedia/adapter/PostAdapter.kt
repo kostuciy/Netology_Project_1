@@ -32,20 +32,21 @@ class PostAdapter(private val onInteractionListener: OnInteractionListener) :
                 author.text = post.author
                 date.text = post.publishedDate
                 postText.text = post.content
-                likeText.text = formatPostNumbers(post.likes)
-                shareText.text = formatPostNumbers(post.shares)
-                viewsText.text = formatPostNumbers(post.views)
+//                likeText.text = formatPostNumbers(post.likes)
+//                shareText.text = formatPostNumbers(post.shares)
+                views.text = formatPostNumbers(post.views)
                 like.apply {
-                    setImageResource(
-                        if (post.likedByMe) R.drawable.baseline_favorite_border_red_24
-                        else R.drawable.baseline_favorite_border_24
-                    )
+                    isChecked = post.likedByMe
+                    text = formatPostNumbers(post.likes)
                     setOnClickListener {
                         onInteractionListener.onLike(post)
                     }
                 }
-                share.setOnClickListener {
-                    onInteractionListener.onShare(post)
+                share.apply {
+                    text = formatPostNumbers(post.shares)
+                    setOnClickListener {
+                        onInteractionListener.onShare(post)
+                    }
                 }
 
                 menu.setOnClickListener {
