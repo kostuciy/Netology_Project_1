@@ -78,4 +78,15 @@
         app:layout_constraintEnd_toStartOf="@+id/cancelEditButton"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="TextView" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:foregroundGravity="center_horizontal"
+        android:scaleType="fitStart"
+        app:layout_constraintBottom_toBottomOf="@+id/post_list"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/baseline_add_circle_outline_24" />
 </androidx.constraintlayout.widget.ConstraintLayout>

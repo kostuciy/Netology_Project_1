@@ -1,9 +1,11 @@
 package ru.netology.nmedia
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.launch
 import ru.netology.nmedia.viewmodel.PostViewModel
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,6 +26,16 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
+            result ?: return@registerForActivityResult
+//            if received non-null content from post activity, then update view model
+            postViewModel.apply {
+                changeContent(result)
+                savePost()
+            }
+
+        }
+
 //        setting up recycler view
         postAdapter = PostAdapter(
 //            onLikeListener = { post: Post -> postViewModel.updateLikesById(post.id) },
@@ -33,12 +45,22 @@ class MainActivity : AppCompatActivity() {
                 override fun onLike(post: Post) =
                     postViewModel.updateLikesById(post.id)
 
-                override fun onShare(post: Post) =
+                override fun onShare(post: Post) {
                     postViewModel.updateSharesById(post.id)
 
-                override fun onEdit(post: Post) =
-                    postViewModel.setToEdit(post)
+                    val intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, post.content)
+                        type = "text/plain"
+                    }
+                    val shareIntent = Intent.createChooser(intent, null)
+                    startActivity(shareIntent)
+                }
 
+                override fun onEdit(post: Post) {
+                    postViewModel.setToEdit(post)
+                    newPostLauncher.launch(post.content)
+                }
 
                 override fun onRemove(post: Post) =
                     postViewModel.removeById(post.id)
@@ -73,6 +95,10 @@ class MainActivity : AppCompatActivity() {
                 hideEditTab(binding)
                 clearEditView(it)
                 postViewModel.setToNewPost()
+            }
+
+            floatingActionButton.setOnClickListener {
+                newPostLauncher.launch(null)
             }
         }
 
