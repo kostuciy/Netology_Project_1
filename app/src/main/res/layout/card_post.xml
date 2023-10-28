@@ -14,8 +14,8 @@
         android:layout_height="24dp"
         android:layout_marginEnd="@dimen/common_spacing"
         android:background="@android:color/transparent"
-        android:paddingStart="4dp"
         android:contentDescription="@string/more_button_content_description"
+        android:paddingStart="4dp"
         app:icon="@drawable/posts_more_vector"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/avatar" />
@@ -86,7 +86,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="post_text" />
+        app:constraint_referenced_ids="videoName" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/like"
@@ -125,6 +125,40 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toEndOf="@+id/post_text"
         app:layout_constraintTop_toTopOf="@+id/share" />
+
+    <ImageButton
+        android:id="@+id/videoThumbnail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/common_spacing"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_launcher_background"
+        app:layout_constraintEnd_toEndOf="@+id/post_text"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/post_text"
+        app:layout_constraintTop_toBottomOf="@+id/post_text" />
+
+    <TextView
+        android:id="@+id/videoName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:text="TextView"
+        android:textColor="@color/publisher_text_color"
+        app:layout_constraintEnd_toEndOf="@+id/videoThumbnail"
+        app:layout_constraintStart_toStartOf="@+id/videoThumbnail"
+        app:layout_constraintTop_toBottomOf="@+id/videoThumbnail" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/videoGroup"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="videoName, videoThumbnail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

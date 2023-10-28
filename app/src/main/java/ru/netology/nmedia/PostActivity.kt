@@ -14,12 +14,14 @@ class PostActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.apply {
-            edit.apply {
-                intent.getStringExtra(Intent.EXTRA_TEXT)?.let { postText ->
-                    this.setText(postText)
+            intent.apply {
+                getStringExtra(EXTRA_CONTENT_TEXT)?.let { postText ->
+                    edit.setText(postText)
                 }
-                requestFocus()
-            }
+                getStringExtra(EXTRA_VIDEO_LINK_TEXT)?.let {linkText ->
+                    editVideo.setText(linkText)
+                }
+        }
 
             fabSend.setOnClickListener {
                 val intent = Intent()
@@ -27,7 +29,11 @@ class PostActivity : AppCompatActivity() {
                     setResult(RESULT_CANCELED, intent)
                 else {
                     val content = binding.edit.text.toString()
-                    intent.putExtra(Intent.EXTRA_TEXT, content)
+                    intent.putExtra(EXTRA_CONTENT_TEXT, content)
+
+                    val videoLink = binding.editVideo.text.toString()
+                    intent.putExtra(EXTRA_VIDEO_LINK_TEXT, videoLink)
+
                     setResult(RESULT_OK, intent)
                 }
                 finish()

@@ -3,6 +3,7 @@ package ru.netology.nmedia.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.data_transfer_object.Post
+import ru.netology.nmedia.data_transfer_object.VideoAttachment
 
 class PostRepositoryInMemoryImpl : PostRepository {
     private var nextId = 4L // TODO: change to 1
@@ -15,7 +16,8 @@ class PostRepositoryInMemoryImpl : PostRepository {
             999,
             1099,
             2,
-            false
+            false,
+            VideoAttachment("https://www.youtube.com/watch?v=zdpcw6CTkqw&ab_channel=WaleedTalha")
         ),
         Post(
             2,

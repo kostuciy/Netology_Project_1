@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import ru.netology.nmedia.data_transfer_object.Post
+import ru.netology.nmedia.data_transfer_object.VideoAttachment
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryInMemoryImpl
 
@@ -43,6 +44,18 @@ class PostViewModel : ViewModel() {
             val text = content.trim()
             if (text != post.content) {
                 currentPost.value = post.copy(content = text)
+            }
+        }
+    }
+    fun changeVideoAttachment(videoLink: String) {
+        currentPost.value?.let { post ->
+            val text = videoLink.trim()
+            currentPost.value = when {
+                post.videoAttachment == null ->
+                    post.copy(videoAttachment = VideoAttachment(videoLink))
+                text != post.videoAttachment.link ->
+                    post.copy(content = text)
+                else -> post
             }
         }
     }

@@ -10,4 +10,5 @@
     <string name="post_edit_text">Write something</string>
     <string name="error_empty_content">No text written</string>
     <string name="menu_edit_text">Edit</string>
+    <string name="post_video_text">Enter YouTube video URL link</string>
 </resources>

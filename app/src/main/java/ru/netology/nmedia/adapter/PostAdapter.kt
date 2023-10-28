@@ -1,6 +1,10 @@
 package ru.netology.nmedia.adapter
 
+import android.graphics.Bitmap
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
@@ -9,22 +13,33 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.R
 import ru.netology.nmedia.data_transfer_object.Post
 import ru.netology.nmedia.databinding.CardPostBinding
-
-typealias onPostListener = (post: Post) -> Unit
+import ru.netology.nmedia.util.AndroidUtils
+import java.util.concurrent.Executors
 
 interface OnInteractionListener {
+
     fun onLike(post: Post)
     fun onShare(post: Post)
     fun onEdit(post: Post)
     fun onRemove(post: Post)
+    fun onVideoClick(post: Post)
 }
 
-class PostAdapter(private val onInteractionListener: OnInteractionListener) :
+interface AttachmentManager {
+
+    fun updateVideoThumbnail(newThumbnail: Bitmap?): Bitmap
+}
+
+class PostAdapter(
+    private val onInteractionListener: OnInteractionListener,
+    private val attachmentObserver: AttachmentManager
+    ) :
     ListAdapter<Post, PostAdapter.PostViewHolder>(PostDiffCallback) {
 
     class PostViewHolder(
         private val binding: CardPostBinding,
-        private val onInteractionListener: OnInteractionListener
+        private val onInteractionListener: OnInteractionListener,
+        private val attachmentManager: AttachmentManager
     ) : RecyclerView.ViewHolder(binding.root) {
         fun bindData(post: Post) {
             binding.apply {
@@ -32,9 +47,8 @@ class PostAdapter(private val onInteractionListener: OnInteractionListener) :
                 author.text = post.author
                 date.text = post.publishedDate
                 postText.text = post.content
-//                likeText.text = formatPostNumbers(post.likes)
-//                shareText.text = formatPostNumbers(post.shares)
                 views.text = formatPostNumbers(post.views)
+
                 like.apply {
                     isChecked = post.likedByMe
                     text = formatPostNumbers(post.likes)
@@ -48,7 +62,6 @@ class PostAdapter(private val onInteractionListener: OnInteractionListener) :
                         onInteractionListener.onShare(post)
                     }
                 }
-
                 menu.setOnClickListener {
                     PopupMenu(it.context, it).apply {
                         inflate(R.menu.options_post)
@@ -58,14 +71,45 @@ class PostAdapter(private val onInteractionListener: OnInteractionListener) :
                                     onInteractionListener.onRemove(post)
                                     true
                                 }
+
                                 R.id.editItem -> {
                                     onInteractionListener.onEdit(post)
                                     true
                                 }
+
                                 else -> false
                             }
                         }
                     }.show()
+                }
+
+//                checking if post has video attachment
+                if (!post.videoAttachment?.link.isNullOrBlank()) {
+//                    downloads thumbnail image in background so UI thread won't freeze
+                    val executor = Executors.newSingleThreadExecutor()
+                    val handler = Handler(Looper.getMainLooper())
+                    try {
+                        executor.execute {
+                            val thumbnailBitmap =
+                                AndroidUtils.getYTVideoThumbnail(post.videoAttachment!!.link).let {
+                                    attachmentManager.updateVideoThumbnail(it)
+                                }
+                            val videoName = "???" // TODO: find way to get video name
+
+                            handler.post {
+                                binding.videoName.text = videoName //?: "???"
+//
+                                videoThumbnail.setImageBitmap(thumbnailBitmap)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        videoGroup.visibility = View.GONE
+                    }
+
+                    videoThumbnail.setOnClickListener {
+                            onInteractionListener.onVideoClick(post)
+                    }
+                    videoGroup.visibility = View.VISIBLE
                 }
             }
         }
@@ -98,7 +142,7 @@ class PostAdapter(private val onInteractionListener: OnInteractionListener) :
         val cardPostBinging  = CardPostBinding.inflate(
             LayoutInflater.from(parent.context), parent, false)
 
-        return PostViewHolder(cardPostBinging, onInteractionListener)
+        return PostViewHolder(cardPostBinging, onInteractionListener, attachmentObserver)
     }
 
     override fun onBindViewHolder(postViewHolder: PostViewHolder, position: Int) {
