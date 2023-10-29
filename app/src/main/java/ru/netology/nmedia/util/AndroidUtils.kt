@@ -1,7 +1,5 @@
 package ru.netology.nmedia.util
 
-//import org.apache.commons.io.IOUtils
-//import org.json.JSONObject
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

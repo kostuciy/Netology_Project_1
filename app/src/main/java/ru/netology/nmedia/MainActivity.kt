@@ -28,12 +28,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
-//            if creating/editing canceled, then currentPost switches to empty
-            if (result?.first == null) {
-                postViewModel.setToNewPost()
-                return@registerForActivityResult
-            }
+            if (result == null) return@registerForActivityResult
 //            if received non-null content from post activity, then update view model
+
             postViewModel.apply {
                 changeContent(result.first!!)
                 result.second?.let { link ->

@@ -18,7 +18,7 @@ class PostActivity : AppCompatActivity() {
                 getStringExtra(EXTRA_CONTENT_TEXT)?.let { postText ->
                     edit.setText(postText)
                 }
-                getStringExtra(EXTRA_VIDEO_LINK_TEXT)?.let {linkText ->
+                getStringExtra(EXTRA_VIDEO_LINK_TEXT)?.let { linkText ->
                     editVideo.setText(linkText)
                 }
         }
