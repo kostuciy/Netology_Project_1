@@ -3,7 +3,8 @@
     <string name="app_name">НМедиа</string>
     <string name="nmedia">НМедиа!</string>
     <string name="remove_option_text">Удалить</string>
-    <string name="post_edit_text">Write something</string>
-    <string name="error_empty_content">No text written</string>
-    <string name="menu_edit_text">Edit</string>
+    <string name="post_edit_text">Напишите что-нибудь</string>
+    <string name="error_empty_content">Ничего не написано</string>
+    <string name="menu_edit_text">Редактировать</string>
+    <string name="post_video_text">Вставить ссылку на YouTube видео</string>
 </resources>
