@@ -110,6 +110,8 @@ class PostAdapter(
                             onInteractionListener.onVideoClick(post)
                     }
                     videoGroup.visibility = View.VISIBLE
+                } else {
+                    videoGroup.visibility = View.GONE
                 }
             }
         }

@@ -28,7 +28,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
-            if (result == null) return@registerForActivityResult
+            if (result == null) {
+                postViewModel.setToNewPost()
+                return@registerForActivityResult
+            }
 //            if received non-null content from post activity, then update view model
 
             postViewModel.apply {
@@ -43,6 +46,7 @@ class MainActivity : AppCompatActivity() {
 //        setting up recycler view
         postAdapter = PostAdapter(
             object : OnInteractionListener {
+
                 override fun onLike(post: Post) =
                     postViewModel.updateLikesById(post.id)
 
@@ -81,6 +85,7 @@ class MainActivity : AppCompatActivity() {
                 }
             },
             object : AttachmentManager {
+
                 override fun updateVideoThumbnail(newThumbnail: Bitmap?) =
                     newThumbnail ?: BitmapFactory.decodeResource(
                             applicationContext.resources,
