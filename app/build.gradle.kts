@@ -42,7 +42,7 @@ android {
 
 dependencies {
 
-//    implementation("org.apache.directory.studio:org.apache.commons.io:2.4")
+    implementation("com.google.code.gson:gson:2.8.7")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.fragment:fragment-ktx:1.6.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
