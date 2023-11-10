@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "ru.netology.nmedia"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "ru.netology.nmedia"
@@ -41,6 +41,10 @@ android {
 }
 
 dependencies {
+    val nav_version = "2.7.5"
+    // Kotlin
+    implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
+    implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
 
     implementation("com.google.code.gson:gson:2.8.7")
     implementation("androidx.core:core-ktx:1.9.0")

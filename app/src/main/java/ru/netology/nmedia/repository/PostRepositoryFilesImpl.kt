@@ -26,7 +26,11 @@ class PostRepositoryFilesImpl(private val context: Context) : PostRepository {
         if (file.exists()) {
             context.openFileInput(filename).bufferedReader().use {
                 postList = gson.fromJson(it, type)
-                nextId = postList.maxOf { it.id } + 1
+                nextId = try {
+                    postList.maxOf { it.id } + 1
+                } catch (e: NoSuchElementException) {
+                    1
+                }
                 postData.value = postList
             }
         } else sync()
@@ -47,7 +51,7 @@ class PostRepositoryFilesImpl(private val context: Context) : PostRepository {
         } else {
             postList = postList.map {
                 if (it.id != post.id) it
-                else it.copy(content = post.content)
+                else post
             }
         }
         postData.value = postList

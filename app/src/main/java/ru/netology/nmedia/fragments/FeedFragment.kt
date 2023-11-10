@@ -1,47 +1,51 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.fragments
 
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import ru.netology.nmedia.viewmodel.PostViewModel
-import androidx.activity.viewModels
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.AttachmentManager
 import ru.netology.nmedia.adapter.PostAdapter
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.data_transfer_object.Post
-import ru.netology.nmedia.databinding.ActivityMainBinding
+import ru.netology.nmedia.databinding.FragmentFeedBinding
 
-const val EXTRA_CONTENT_TEXT = "content_text"
-const val EXTRA_VIDEO_LINK_TEXT = "video_link"
-class MainActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityMainBinding
+class FeedFragment : Fragment() {
+    private lateinit var binding: FragmentFeedBinding
     private lateinit var postAdapter: PostAdapter
-    private val postViewModel: PostViewModel by viewModels()
+    private val postViewModel: PostViewModel by activityViewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
-            if (result == null) {
-                postViewModel.setToNewPost()
-                return@registerForActivityResult
-            }
-//            if received non-null content from post activity, then update view model
-
-            postViewModel.apply {
-                changeContent(result.first!!)
-                result.second?.let { link ->
-                    changeVideoAttachment(link)
-                }
-                savePost()
-            }
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentFeedBinding.inflate(layoutInflater, container, false)
+//        val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
+//            if (result == null) {
+//                postViewModel.setToNewPost()
+//                return@registerForActivityResult
+//            }
+////            if received non-null content from post activity, then update view model
+//
+//            postViewModel.apply {
+//                changeContent(result.first!!)
+//                result.second?.let { link ->
+//                    changeVideoAttachment(link)
+//                }
+//                savePost()
+//            }
+//        }
 
 //        setting up recycler view
         postAdapter = PostAdapter(
@@ -64,9 +68,10 @@ class MainActivity : AppCompatActivity() {
 
                 override fun onEdit(post: Post) {
                     postViewModel.setToEdit(post)
-                    newPostLauncher.launch(
-                        Pair(post.content, post.videoAttachment?.link ?: "")
-                    )
+                    findNavController().navigate(R.id.action_feedFragment_to_postFragment)
+//                    newPostLauncher.launch(
+//                        Pair(post.content, post.videoAttachment?.link ?: "")
+//                    )
                 }
 
                 override fun onRemove(post: Post) =
@@ -79,16 +84,22 @@ class MainActivity : AppCompatActivity() {
                         action = Intent.ACTION_VIEW
                         data = Uri.parse(post.videoAttachment.link)
                     }
-                    if (intent.resolveActivity(packageManager) != null) {
+                    if (intent.resolveActivity(requireActivity().packageManager) != null) {
                         startActivity(intent)
                     }
                 }
+
+                override fun onPostClick(post: Post) {
+                    postViewModel.setToEdit(post)
+                    findNavController().navigate(R.id.action_feedFragment_to_postFragment2)
+                }
             },
+
             object : AttachmentManager {
 
                 override fun updateVideoThumbnail(newThumbnail: Bitmap?) =
                     newThumbnail ?: BitmapFactory.decodeResource(
-                            applicationContext.resources,
+                            requireActivity().applicationContext.resources,
                         R.drawable.video_not_found_error
                     )
             }
@@ -96,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.apply {
             postList.apply {
-                layoutManager = LinearLayoutManager(this@MainActivity)
+                layoutManager = LinearLayoutManager(context)
                 binding.postList.adapter = postAdapter
             }
 
@@ -125,12 +136,16 @@ class MainActivity : AppCompatActivity() {
 //            }
 //
             floatingActionButton.setOnClickListener {
-                newPostLauncher.launch(null to null)
+//                newPostLauncher.launch(null to null)
+                postViewModel.setToNewPost()
+                findNavController().navigate(R.id.action_feedFragment_to_postFragment)
             }
+
+
         }
 
         postViewModel.apply {
-            postData.observe(this@MainActivity) { postList ->
+            postData.observe(viewLifecycleOwner) { postList ->
                 postAdapter.submitList(postList)
             }
 
@@ -147,6 +162,8 @@ class MainActivity : AppCompatActivity() {
 //
 //            }
         }
+
+        return binding.root
     }
 
 //    private fun clearEditView(view: View) {

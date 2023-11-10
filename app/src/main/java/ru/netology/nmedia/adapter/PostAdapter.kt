@@ -23,6 +23,8 @@ interface OnInteractionListener {
     fun onEdit(post: Post)
     fun onRemove(post: Post)
     fun onVideoClick(post: Post)
+
+    fun onPostClick(post: Post)
 }
 
 interface AttachmentManager {
@@ -112,6 +114,10 @@ class PostAdapter(
                     videoGroup.visibility = View.VISIBLE
                 } else {
                     videoGroup.visibility = View.GONE
+                }
+
+                layout.setOnClickListener {
+                    onInteractionListener.onPostClick(post)
                 }
             }
         }

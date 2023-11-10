@@ -4,13 +4,10 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import ru.netology.nmedia.data_transfer_object.Post
 import ru.netology.nmedia.data_transfer_object.VideoAttachment
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryFilesImpl
-import ru.netology.nmedia.repository.PostRepositoryInMemoryImpl
-import ru.netology.nmedia.repository.PostRepositorySharedPrefsImpl
 
 private val emptyPost = Post(
     id = 0,
@@ -32,8 +29,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         currentPost.value?.let {
             repository.savePost(it)
         }
-
-        currentPost.value = emptyPost
     }
 
     fun setToEdit(post: Post) {
@@ -55,10 +50,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         currentPost.value?.let { post ->
             val text = videoLink.trim()
             currentPost.value = when {
+                text.isBlank() -> post.copy(videoAttachment = null)
                 post.videoAttachment == null ->
-                    post.copy(videoAttachment = VideoAttachment(videoLink))
+                    post.copy(videoAttachment = VideoAttachment(text))
                 text != post.videoAttachment.link ->
-                    post.copy(content = text)
+                    post.copy(videoAttachment = VideoAttachment(text))
                 else -> post
             }
         }
