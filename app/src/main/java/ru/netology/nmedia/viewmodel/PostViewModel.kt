@@ -6,8 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import ru.netology.nmedia.data_transfer_object.Post
 import ru.netology.nmedia.data_transfer_object.VideoAttachment
+import ru.netology.nmedia.database.AppDatabase
 import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryFilesImpl
+import ru.netology.nmedia.repository.PostRepositorySQLiteImpl
 
 private val emptyPost = Post(
     id = 0,
@@ -21,7 +22,10 @@ private val emptyPost = Post(
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: PostRepository = PostRepositoryFilesImpl(application)
+    private val repository: PostRepository = // PostRepositoryFilesImpl(application)
+        PostRepositorySQLiteImpl(
+            AppDatabase.getInstance(context = application).postDao()
+        )
     val postData: LiveData<List<Post>> = repository.getPostData()
     val currentPost = MutableLiveData(emptyPost)
 
