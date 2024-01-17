@@ -8,4 +8,7 @@
     <string name="menu_edit_text">Редактировать</string>
     <string name="post_video_text">Вставить ссылку на YouTube видео</string>
     <string name="channel_remote_name">Уведомления сервера</string>
+    <string name="something_went_wrong">Что-то пошло не так</string>
+    <string name="retry">Повторить попытку</string>
+    <string name="no_posts_in_feed">Нет постов в ленте.</string>
 </resources>
