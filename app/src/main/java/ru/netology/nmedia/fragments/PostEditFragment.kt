@@ -39,11 +39,13 @@ class PostEditFragment : Fragment() {
                     val videoLink = binding.editVideo.text.toString()
                     changeVideoAttachment(videoLink)
                     savePost()
-
-                    AndroidUtils.hideKeyboard(requireView())
-                    findNavController().navigateUp()
                 }
             }
+        }
+
+        postViewModel.postCreated.observe(viewLifecycleOwner) {
+            AndroidUtils.hideKeyboard(requireView())
+            findNavController().navigateUp()
         }
 
         return binding.root

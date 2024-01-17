@@ -53,9 +53,6 @@ class PostFragment : Fragment() {
             override fun onEdit(post: Post) {
                 postViewModel.setToEdit(post)
                 findNavController().navigate(R.id.action_postFragment2_to_postFragment)
-//                    newPostLauncher.launch(
-//                        Pair(post.content, post.videoAttachment?.link ?: "")
-//                    )
             }
 
             override fun onRemove(post: Post) {
@@ -77,6 +74,7 @@ class PostFragment : Fragment() {
 
             override fun onPostClick(post: Post) {}
         }
+
         val postAttachmentManager = object : AttachmentManager {
 
             override fun updateVideoThumbnail(newThumbnail: Bitmap?) =

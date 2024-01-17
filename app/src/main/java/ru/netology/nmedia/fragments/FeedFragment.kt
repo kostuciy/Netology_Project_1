@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import ru.netology.nmedia.viewmodel.PostViewModel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -31,21 +32,6 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentFeedBinding.inflate(layoutInflater, container, false)
-//        val newPostLauncher = registerForActivityResult(NewPostResultContract()) { result ->
-//            if (result == null) {
-//                postViewModel.setToNewPost()
-//                return@registerForActivityResult
-//            }
-////            if received non-null content from post activity, then update view model
-//
-//            postViewModel.apply {
-//                changeContent(result.first!!)
-//                result.second?.let { link ->
-//                    changeVideoAttachment(link)
-//                }
-//                savePost()
-//            }
-//        }
 
 //        setting up recycler view
         postAdapter = PostAdapter(
@@ -69,9 +55,6 @@ class FeedFragment : Fragment() {
                 override fun onEdit(post: Post) {
                     postViewModel.setToEdit(post)
                     findNavController().navigate(R.id.action_feedFragment_to_postFragment)
-//                    newPostLauncher.launch(
-//                        Pair(post.content, post.videoAttachment?.link ?: "")
-//                    )
                 }
 
                 override fun onRemove(post: Post) =
@@ -111,71 +94,25 @@ class FeedFragment : Fragment() {
                 binding.postList.adapter = postAdapter
             }
 
-//            addButton.setOnClickListener {
-//                val text = binding.contentEditText.text.toString()
-//                if (text.isBlank()) {
-//                    Toast.makeText(
-//                        this@MainActivity, R.string.error_empty_content, Toast.LENGTH_SHORT
-//                    ).show()
-//                    return@setOnClickListener
-////                }
-//
-//                postViewModel.changeContent(text)
-//                postViewModel.savePost()
-//
-//                hideEditTab(binding)
-//                clearEditView(it)
-////                AndroidUtils.hideKeyboard(it) // TODO: find out why keyboard doesn't hide after
-////                                              // clearEditView method
-//        }
-
-//            cancelEditButton.setOnClickListener {
-//                hideEditTab(binding)
-//                clearEditView(it)
-//                postViewModel.setToNewPost()
-//            }
-//
             floatingActionButton.setOnClickListener {
-//                newPostLauncher.launch(null to null)
                 postViewModel.setToNewPost()
                 findNavController().navigate(R.id.action_feedFragment_to_postFragment)
             }
 
-
+            retryButton.setOnClickListener {
+                postViewModel.loadPosts()
+            }
         }
 
         postViewModel.apply {
-            postData.observe(viewLifecycleOwner) { postList ->
-                postAdapter.submitList(postList)
+            postData.observe(viewLifecycleOwner) { state ->
+                postAdapter.submitList(state.posts)
+                binding.progress.isVisible = state.loading
+                binding.errorGroup.isVisible = state.error
+                binding.emptyText.isVisible = state.empty
             }
-
-//            currentPost.observe(this@MainActivity) { post ->
-//                if (post.id != 0L) {
-//                    binding.apply {
-//                        contentEditText.setText(post.content)
-//                        contentEditText.focusAndShowKeyboard()
-//
-//                        editPostText.text = post.content
-//                        editGroup.visibility = View.VISIBLE
-//                    }
-//                }
-//
-//            }
         }
 
         return binding.root
     }
-
-//    private fun clearEditView(view: View) {
-//        binding.contentEditText.setText("")
-//        binding.contentEditText.clearFocus()
-//        AndroidUtils.hideKeyboard(view)
-//    }
-//
-//    private fun hideEditTab(binding: ActivityMainBinding) {
-//        binding.apply {
-//            editGroup.visibility = View.GONE
-//            editPostText.text = ""
-//        }
-//    }
 }
