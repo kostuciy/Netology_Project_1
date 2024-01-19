@@ -24,13 +24,10 @@ private val emptyPost = Post(
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: PostRepository = // PostRepositoryFilesImpl(application)
-//        PostRepositorySQLiteImpl(
-//            AppDatabase.getInstance(context = application).postDao()
-//        )
-        PostRepositoryHttpImpl()
+    private val repository: PostRepository = PostRepositoryHttpImpl()
     private val _state = MutableLiveData(FeedState())
-    val postData: LiveData<FeedState>
+
+    val postState: LiveData<FeedState>
         get() = _state
 
     val currentPost = MutableLiveData(emptyPost)
@@ -96,9 +93,26 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateLikesById(id: Long) {
+        val post =
+            _state.value?.posts?.find { it.id == id } ?: return
         thread {
-            repository.updateLikesById(id)
-            loadPosts()
+//            quick update for ui to show +1 like
+            _state.value?.let { state ->
+                val likedPost = post.copy(
+                    likedByMe = !post.likedByMe,
+                    likes = post.likes + if (post.likedByMe) -1 else 1,
+                    publishedDate = ""
+                )
+                val quickSyncedList = state.posts.map {
+                    if (it.id == id) likedPost else it
+                }
+                _state.postValue(FeedState(posts = quickSyncedList))
+            }
+
+//            full async update for ui, shows actual updated list
+            repository.updateLikesById(post)
+            val syncedList = repository.getPostData()
+            _state.postValue(FeedState(posts = syncedList))
         }
     }
     fun updateSharesById(id: Long) = repository.updateShares(id)

@@ -61,11 +61,7 @@ class PostRepositoryHttpImpl : PostRepository {
         return gson.fromJson(responseText, Post::class.java)
     }
 
-    override fun updateLikesById(id: Long) {
-        val post = getPostData().find { it.id == id }.let { post ->
-            post ?: throw IllegalArgumentException()
-        }
-
+    override fun updateLikesById(post: Post) {
         val request = if (!post.likedByMe)
             Request.Builder()
                 .url("${BASE_URL}api/slow/posts/${post.id}/likes")
@@ -80,6 +76,12 @@ class PostRepositoryHttpImpl : PostRepository {
 
 //        val body = requireNotNull(response.body)
 //        return gson.fromJson(body.string(), Post::class.java)
+//
+//        return post.copy(
+//            likedByMe = !post.likedByMe,
+//            likes = post.likes + if (post.likedByMe) -1 else 1,
+//            publishedDate = "Now"
+//        )
     }
 
     override fun updateShares(id: Long) {

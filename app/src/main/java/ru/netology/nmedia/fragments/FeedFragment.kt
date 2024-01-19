@@ -105,7 +105,7 @@ class FeedFragment : Fragment() {
         }
 
         postViewModel.apply {
-            postData.observe(viewLifecycleOwner) { state ->
+            postState.observe(viewLifecycleOwner) { state ->
                 postAdapter.submitList(state.posts)
                 binding.progress.isVisible = state.loading
                 binding.errorGroup.isVisible = state.error
