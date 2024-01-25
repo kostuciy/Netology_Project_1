@@ -42,15 +42,19 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadPosts() {
-        thread {
-            _state.postValue(FeedState(loading = true))
-            try {
-                val posts = repository.getPostData()
-                _state.postValue(FeedState(posts = posts, empty = posts.isEmpty()))
-            } catch (e: Exception) {
+//            starting download
+        _state.postValue(FeedState(loading = true))
+
+        repository.getPostDataAsync(object : PostRepository.GetPostsCallback {
+            override fun onSuccess(posts: List<Post>) {
+                _state.postValue(FeedState(posts = posts, empty = posts.isEmpty()) )
+            }
+
+            override fun onError(throwable: Throwable) {
                 _state.postValue(FeedState(error = true))
             }
         }
+        )
     }
 
     fun savePost() {
@@ -109,10 +113,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _state.postValue(FeedState(posts = quickSyncedList))
             }
 
-//            full async update for ui, shows actual updated list
-            repository.updateLikesById(post)
-            val syncedList = repository.getPostData()
-            _state.postValue(FeedState(posts = syncedList))
+//            full async update for liked post
+            val syncedPost = repository.updateLikesById(post)
+            _state.postValue(FeedState(
+                posts = _state.value?.posts?.map { if (it.id == syncedPost.id) syncedPost else it }
+                    .orEmpty()
+            ))
         }
     }
     fun updateSharesById(id: Long) = repository.updateShares(id)
