@@ -25,7 +25,7 @@ class PostRepositoryHttpImpl : PostRepository {
         private val type = object : TypeToken<List<Post>>() {}.type
     }
 
-    override fun getPostDataAsync(callback: PostRepository.GetPostsCallback) {
+    override fun getPostDataAsync(callback: PostRepository.PostCallback<List<Post>>) {
         val request = Request.Builder()
             .url("${BASE_URL}api/slow/posts")
             .build()
@@ -77,21 +77,45 @@ class PostRepositoryHttpImpl : PostRepository {
 //        return gson.fromJson<Post>(responseText, Post::class.java)
 //    }
 
-    override fun savePost(post: Post): Post {
+    override fun savePost(post: Post, callback: PostRepository.PostCallback<Post>){
         val request = Request.Builder()
             .url("${BASE_URL}api/slow/posts")
             .post(gson.toJson(post).toRequestBody(jsonType))
             .build()
-        val call = client.newCall(request)
-        val response = call.execute()
 
-        val body = requireNotNull(response.body)
-        val responseText = body.string()
+        return client.newCall(request)
+            .enqueue(
+                object : Callback {
+                    override fun onFailure(call: Call, e: IOException) {
+                        callback.onError(e)
+                    }
 
-        return gson.fromJson(responseText, Post::class.java)
+                    override fun onResponse(call: Call, response: Response) {
+                        val responseText = response.body?.string()
+
+                        if (responseText == null) {
+                            callback.onError(RuntimeException("body is null"))
+                            return
+                        }
+
+                        try {
+                            callback.onSuccess(gson.fromJson(responseText, Post::class.java))
+                        } catch (e: Exception) {
+                            callback.onError(e)
+                        }
+                    }
+                }
+            )
+//        val call = client.newCall(request)
+//        val response = call.execute()
+//
+//        val body = requireNotNull(response.body)
+//        val responseText = body.string()
+//
+//        return gson.fromJson(responseText, Post::class.java)
     }
 
-    override fun updateLikesById(post: Post): Post {
+    override fun updateLikesById(post: Post, callback: PostRepository.PostCallback<Post>) {
         val request = if (!post.likedByMe)
             Request.Builder()
                 .url("${BASE_URL}api/slow/posts/${post.id}/likes")
@@ -101,11 +125,33 @@ class PostRepositoryHttpImpl : PostRepository {
             .url("${BASE_URL}api/slow/posts/${post.id}/likes")
             .delete(gson.toJson(post).toRequestBody(jsonType))
             .build()
-        val call = client.newCall(request)
-        val response = call.execute()
 
-        val body = requireNotNull(response.body)
-        return gson.fromJson(body.string(), Post::class.java)
+        client.newCall(request).enqueue(
+            object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    callback.onError(e)
+                }
+
+                override fun onResponse(call: Call, response: Response) {
+                    val responseText = response.body?.string()
+
+                    if (responseText == null) {
+                        callback.onError(RuntimeException("body is null"))
+                        return
+                    }
+
+                    try {
+                        callback.onSuccess(gson.fromJson(responseText, Post::class.java))
+                    } catch (e: Exception) {
+                        callback.onError(e)
+                    }
+                }
+            }
+        )
+//        val response = call.execute()
+//
+//        val body = requireNotNull(response.body)
+//        return gson.fromJson(body.string(), Post::class.java)
 //
 //        return post.copy(
 //            likedByMe = !post.likedByMe,

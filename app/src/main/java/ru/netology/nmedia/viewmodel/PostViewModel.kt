@@ -10,7 +10,6 @@ import ru.netology.nmedia.model.FeedState
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryHttpImpl
 import ru.netology.nmedia.util.SingleLiveEvent
-import kotlin.concurrent.thread
 
 private val emptyPost = Post(
     id = 0,
@@ -45,7 +44,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //            starting download
         _state.postValue(FeedState(loading = true))
 
-        repository.getPostDataAsync(object : PostRepository.GetPostsCallback {
+        repository.getPostDataAsync(object : PostRepository.PostCallback<List<Post>> {
             override fun onSuccess(posts: List<Post>) {
                 _state.postValue(FeedState(posts = posts, empty = posts.isEmpty()) )
             }
@@ -58,13 +57,27 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun savePost() {
-        thread {
-            currentPost.value?.let {
-                repository.savePost(it)
-                _postCreated.postValue(Unit)
-                loadPosts()
+        currentPost.value?.let { post ->
+            repository.savePost(post, object : PostRepository.PostCallback<Post> {
+                override fun onSuccess(argument: Post) {
+                    _postCreated.postValue(Unit)
+                    loadPosts()
+                }
+
+                override fun onError(throwable: Throwable) {
+                    _state.postValue(FeedState(error = true))
+                }
             }
+            )
         }
+
+//        thread {
+//            currentPost.value?.let {
+//                repository.savePost(it)
+//                _postCreated.postValue(Unit)
+//                loadPosts()
+//            }
+//        }
     }
 
     fun setToEdit(post: Post) {
@@ -99,27 +112,54 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun updateLikesById(id: Long) {
         val post =
             _state.value?.posts?.find { it.id == id } ?: return
-        thread {
-//            quick update for ui to show +1 like
-            _state.value?.let { state ->
-                val likedPost = post.copy(
-                    likedByMe = !post.likedByMe,
-                    likes = post.likes + if (post.likedByMe) -1 else 1,
-                    publishedDate = ""
-                )
-                val quickSyncedList = state.posts.map {
-                    if (it.id == id) likedPost else it
-                }
-                _state.postValue(FeedState(posts = quickSyncedList))
+        // quick update for ui to show +1 like
+        _state.value?.let { state ->
+            val likedPost = post.copy(
+                likedByMe = !post.likedByMe,
+                likes = post.likes + if (post.likedByMe) -1 else 1,
+                publishedDate = ""
+            )
+            val quickSyncedList = state.posts.map {
+                if (it.id == id) likedPost else it
+            }
+            _state.postValue(FeedState(posts = quickSyncedList))
+        }
+
+        repository.updateLikesById(post, object : PostRepository.PostCallback<Post> {
+            override fun onSuccess(argument: Post) {
+                // full async update for liked post
+                _state.postValue(FeedState(
+                    posts = _state.value?.posts?.map { if (it.id == argument.id) argument else it }
+                        .orEmpty()
+                ))
             }
 
-//            full async update for liked post
-            val syncedPost = repository.updateLikesById(post)
-            _state.postValue(FeedState(
-                posts = _state.value?.posts?.map { if (it.id == syncedPost.id) syncedPost else it }
-                    .orEmpty()
-            ))
+            override fun onError(throwable: Throwable) {
+                _state.postValue(FeedState(error = true))
+            }
         }
+        )
+//        thread {
+////            quick update for ui to show +1 like
+//            _state.value?.let { state ->
+//                val likedPost = post.copy(
+//                    likedByMe = !post.likedByMe,
+//                    likes = post.likes + if (post.likedByMe) -1 else 1,
+//                    publishedDate = ""
+//                )
+//                val quickSyncedList = state.posts.map {
+//                    if (it.id == id) likedPost else it
+//                }
+//                _state.postValue(FeedState(posts = quickSyncedList))
+//            }
+//
+////            full async update for liked post
+//            val syncedPost = repository.updateLikesById(post)
+//            _state.postValue(FeedState(
+//                posts = _state.value?.posts?.map { if (it.id == syncedPost.id) syncedPost else it }
+//                    .orEmpty()
+//            ))
+//        }
     }
     fun updateSharesById(id: Long) = repository.updateShares(id)
     fun removeById(id: Long) = repository.removeById(id)

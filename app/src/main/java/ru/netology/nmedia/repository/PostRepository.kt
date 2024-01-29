@@ -4,15 +4,15 @@ import ru.netology.nmedia.data_transfer_object.Post
 
 interface PostRepository {
 
-    fun getPostDataAsync(callback: GetPostsCallback)
-    fun savePost(post: Post): Post
-    fun updateLikesById(post: Post): Post
+    fun getPostDataAsync(callback: PostCallback<List<Post>>)
+    fun savePost(post: Post, callback: PostCallback<Post>)
+    fun updateLikesById(post: Post, callback: PostCallback<Post>)
     fun updateShares(id: Long)
     fun removeById(id: Long)
 
-    interface GetPostsCallback {
+    interface PostCallback<T> {
 
-        fun onSuccess(posts: List<Post>)
+        fun onSuccess(argument: T)
         fun onError(throwable: Throwable)
     }
 }
