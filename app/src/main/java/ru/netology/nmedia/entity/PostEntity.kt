@@ -21,7 +21,7 @@ data class PostEntity(
 
     fun toDto(): Post = with(this) {
         Post(
-            id = id, author = author, publishedDate = publishedDate,
+            id = id, author = author, published = publishedDate,
             content = content, likes = likes, shares = shares,
             views = views, likedByMe = likedByMe, videoAttachment = videoAttachment?.let { VideoAttachment(it) }
         )
@@ -30,7 +30,7 @@ data class PostEntity(
     companion object {
         fun fromDto(dto: Post): PostEntity = with(dto) {
             PostEntity(
-                id = id, author = author, publishedDate = publishedDate,
+                id = id, author = author, publishedDate = published,
                 content = content, likes = likes, shares = shares,
                 views = views, likedByMe = likedByMe, videoAttachment = videoAttachment?.link
             )

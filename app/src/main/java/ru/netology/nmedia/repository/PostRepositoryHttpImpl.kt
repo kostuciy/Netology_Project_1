@@ -1,5 +1,7 @@
 package ru.netology.nmedia.repository
 
+import android.view.View
+import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
@@ -18,6 +20,7 @@ class PostRepositoryHttpImpl : PostRepository {
         .connectTimeout(30, TimeUnit.SECONDS)
         .build()
     private val gson = Gson()
+
 
     companion object {
         private const val BASE_URL = "http://10.0.2.2:9999/"
@@ -166,6 +169,11 @@ class PostRepositoryHttpImpl : PostRepository {
 
     override fun removeById(id: Long) {
         TODO("Not yet implemented")
+    }
+
+    fun setAvatar(view: View, id: Long) {
+        Glide.with(view)
+            .load("${BASE_URL}api/slow/posts/${id}/likes")
     }
 }
 

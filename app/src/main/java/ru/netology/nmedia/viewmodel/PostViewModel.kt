@@ -16,7 +16,7 @@ private val emptyPost = Post(
     content = "",
     author = "",
     likedByMe = false,
-    publishedDate = "",
+    published = "",
     likes = 0,
     shares = 0,
     views = 0
@@ -116,8 +116,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _state.value?.let { state ->
             val likedPost = post.copy(
                 likedByMe = !post.likedByMe,
+                authorAvatar = "",
                 likes = post.likes + if (post.likedByMe) -1 else 1,
-                publishedDate = ""
+                published = ""
             )
             val quickSyncedList = state.posts.map {
                 if (it.id == id) likedPost else it

@@ -93,7 +93,7 @@ class PostFragment : Fragment() {
         binding.apply {
             avatar.setImageResource(R.drawable.posts_avatar)
             author.text = post.author
-            date.text = post.publishedDate
+            date.text = post.published
             postText.text = post.content
             views.text = formatPostNumbers(post.views)
 
