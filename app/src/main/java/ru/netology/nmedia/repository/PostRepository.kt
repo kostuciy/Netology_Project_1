@@ -1,18 +1,16 @@
 package ru.netology.nmedia.repository
 
-import ru.netology.nmedia.data_transfer_object.Post
+import kotlinx.coroutines.flow.Flow
+import ru.netology.nmedia.dto.Post
 
 interface PostRepository {
+//    changing liveData to flow as it can work in coroutines
+//    (so that operations like updating database wouldn't be executed in UI thread)
+    val data: Flow<List<Post>>
+    suspend fun getAll()
+    suspend fun save(post: Post)
+    suspend fun removeById(id: Long)
+    suspend fun likeById(post: Post)
 
-    fun getPostDataAsync(callback: PostCallback<List<Post>>)
-    fun savePost(post: Post, callback: PostCallback<Post>)
-    fun updateLikesById(post: Post, callback: PostCallback<Post>)
-    fun updateShares(id: Long)
-    fun removeById(id: Long)
-
-    interface PostCallback<T> {
-
-        fun onSuccess(argument: T)
-        fun onError(throwable: Throwable)
-    }
+    fun getNewerCount(id: Long): Flow<Int>
 }

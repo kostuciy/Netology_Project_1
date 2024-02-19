@@ -1,167 +1,141 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import ru.netology.nmedia.data_transfer_object.Post
-import ru.netology.nmedia.data_transfer_object.VideoAttachment
-import ru.netology.nmedia.model.FeedState
+import androidx.lifecycle.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModel
+import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.repository.PostRepository
-import ru.netology.nmedia.repository.PostRepositoryHttpImpl
+import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
 
-private val emptyPost = Post(
+private val empty = Post(
     id = 0,
     content = "",
     author = "",
+    authorAvatar = "",
     likedByMe = false,
-    published = "",
     likes = 0,
-    shares = 0,
-    views = 0
+    published = ""
 )
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
-    private val repository: PostRepository = PostRepositoryHttpImpl()
-    private val _state = MutableLiveData(FeedState())
+    private val repository: PostRepository =
+        PostRepositoryImpl(AppDb.getInstance(context = application).postDao())
 
-    val postState: LiveData<FeedState>
-        get() = _state
+//    *** WHEN USING LIVEDATA IN DAO AND REPOSITORY ***
+//    gets LiveData<List<Post>>) from repository and transforms to LiveData with FeedModel
+//    (has info about current list in local database)
+//    * LiveData complete dependence:
+//      local database (PostEntities) -> repository (Posts) -> view model (FeedModel with posts' info)
+//
+//    *** WHEN USING FLOW IN DAO AND REPOSITORY ***
+//    Flow from from repository from dao constantly returns new post list,
+//    (flow starts as .asLiveData() has terminal operator that starts its work)
+//    so data in VM receives those changes (like normal liveData), which results
+//    in constant update of postList (and ui because of observable) controlled by server
+    val data: LiveData<FeedModel> = repository.data
+        .map(::FeedModel)
+        .catch { e -> e.printStackTrace() }
+        .asLiveData()
+//    has info about current app state while interacting with server
+//    (if error occurred, or if posts are still loading from server)
+    private val _dataState = MutableLiveData<FeedModelState>()
+    val dataState: LiveData<FeedModelState>
+        get() = _dataState
 
-    val currentPost = MutableLiveData(emptyPost)
-
+    private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
     val postCreated: LiveData<Unit>
         get() = _postCreated
 
+//    both map and switchMap result changes when underlying live data changes,
+//    but switchMap is more suited for time-consuming operations
+//    (flows from getNewerCount get disposed when list of posts changes
+//    as they no longer have observers)
+    val newerCount: LiveData<Int> = data.switchMap {
+    repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
+        .asLiveData(Dispatchers.Default)
+    }
 
     init {
         loadPosts()
     }
 
-    fun loadPosts() {
-//            starting download
-        _state.postValue(FeedState(loading = true))
+//    launching from viewModelScope (as retrofit and room are adapted to launch from MainScope)
+//    repository.getAll() results in all LiveData chain changing so database receives
+//    data from server and shows it on screen (with observer on view model's data)
+    fun loadPosts() = viewModelScope.launch {
+        try {
+            _dataState.value = FeedModelState(loading = true)
+            repository.getAll()
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
 
-        repository.getPostDataAsync(object : PostRepository.PostCallback<List<Post>> {
-            override fun onSuccess(posts: List<Post>) {
-                _state.postValue(FeedState(posts = posts, empty = posts.isEmpty()) )
-            }
+    fun refreshPosts() = viewModelScope.launch {
+        try {
+            _dataState.value = FeedModelState(refreshing = true)
+            repository.getAll()
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
 
-            override fun onError(throwable: Throwable) {
-                _state.postValue(FeedState(error = true))
+    fun save() {
+        edited.value?.let {
+            _postCreated.value = Unit
+            viewModelScope.launch {
+                try {
+//                    causes chain reaction of LiveData's from db to repository to view model
+//                    which causes observer to update UI
+                    repository.save(it)
+                    _dataState.value = FeedModelState()
+                } catch (e: Exception) {
+                    _dataState.value = FeedModelState(error = true)
+                }
             }
         }
-        )
+        edited.value = empty
     }
 
-    fun savePost() {
-        currentPost.value?.let { post ->
-            repository.savePost(post, object : PostRepository.PostCallback<Post> {
-                override fun onSuccess(argument: Post) {
-                    _postCreated.postValue(Unit)
-                    loadPosts()
-                }
-
-                override fun onError(throwable: Throwable) {
-                    _state.postValue(FeedState(error = true))
-                }
-            }
-            )
-        }
-
-//        thread {
-//            currentPost.value?.let {
-//                repository.savePost(it)
-//                _postCreated.postValue(Unit)
-//                loadPosts()
-//            }
-//        }
-    }
-
-    fun setToEdit(post: Post) {
-        currentPost.value = post
-    }
-    fun setToNewPost() {
-        currentPost.value = emptyPost
+    fun edit(post: Post) {
+        edited.value = post
     }
 
     fun changeContent(content: String) {
-        currentPost.value?.let { post ->
-            val text = content.trim()
-            if (text != post.content) {
-                currentPost.value = post.copy(content = text)
-            }
+        val text = content.trim()
+        if (edited.value?.content == text) {
+            return
         }
+        edited.value = edited.value?.copy(content = text)
     }
-    fun changeVideoAttachment(videoLink: String) {
-        currentPost.value?.let { post ->
-            val text = videoLink.trim()
-            currentPost.value = when {
-                text.isBlank() -> post.copy(videoAttachment = null)
-                post.videoAttachment == null ->
-                    post.copy(videoAttachment = VideoAttachment(text))
-                text != post.videoAttachment.link ->
-                    post.copy(videoAttachment = VideoAttachment(text))
-                else -> post
+
+    fun likeById(post: Post) {
+        viewModelScope.launch {
+            try {
+                repository.likeById(post)
+            } catch (e: Exception) {
+                _dataState.value = FeedModelState(error = true)
             }
         }
     }
 
-    fun updateLikesById(id: Long) {
-        val post =
-            _state.value?.posts?.find { it.id == id } ?: return
-        // quick update for ui to show +1 like
-        _state.value?.let { state ->
-            val likedPost = post.copy(
-                likedByMe = !post.likedByMe,
-                authorAvatar = "",
-                likes = post.likes + if (post.likedByMe) -1 else 1,
-                published = ""
-            )
-            val quickSyncedList = state.posts.map {
-                if (it.id == id) likedPost else it
-            }
-            _state.postValue(FeedState(posts = quickSyncedList))
-        }
-
-        repository.updateLikesById(post, object : PostRepository.PostCallback<Post> {
-            override fun onSuccess(argument: Post) {
-                // full async update for liked post
-                _state.postValue(FeedState(
-                    posts = _state.value?.posts?.map { if (it.id == argument.id) argument else it }
-                        .orEmpty()
-                ))
-            }
-
-            override fun onError(throwable: Throwable) {
-                _state.postValue(FeedState(error = true))
+    fun removeById(id: Long) {
+        viewModelScope.launch {
+            try {
+                repository.removeById(id)
+            } catch (e: Exception) {
+                _dataState.value = FeedModelState(error = true)
             }
         }
-        )
-//        thread {
-////            quick update for ui to show +1 like
-//            _state.value?.let { state ->
-//                val likedPost = post.copy(
-//                    likedByMe = !post.likedByMe,
-//                    likes = post.likes + if (post.likedByMe) -1 else 1,
-//                    publishedDate = ""
-//                )
-//                val quickSyncedList = state.posts.map {
-//                    if (it.id == id) likedPost else it
-//                }
-//                _state.postValue(FeedState(posts = quickSyncedList))
-//            }
-//
-////            full async update for liked post
-//            val syncedPost = repository.updateLikesById(post)
-//            _state.postValue(FeedState(
-//                posts = _state.value?.posts?.map { if (it.id == syncedPost.id) syncedPost else it }
-//                    .orEmpty()
-//            ))
-//        }
     }
-    fun updateSharesById(id: Long) = repository.updateShares(id)
-    fun removeById(id: Long) = repository.removeById(id)
 }

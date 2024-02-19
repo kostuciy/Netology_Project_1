@@ -1,20 +1,24 @@
 <resources>
-    <string name="app_name">Netology Project 1</string>
-    <string name="nmedia">NMedia</string>
-    <string name="post_publisher_sample" translatable="false">Нетология. Университет интернет-профессий</string>
-    <string name="post_date_sample" translatable="false">16 сентября в 13:24</string>
-    <string name="more_button_content_description" translatable="false">Показать больше</string>
-    <string name="post_text_sample" translatable="false">текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст текст</string>
-    <string name="views_views_sample" translatable="false">100K</string>
-    <string name="remove_option_text">Remove</string>
-    <string name="post_edit_text">Write something</string>
-    <string name="error_empty_content">No text written</string>
-    <string name="menu_edit_text">Edit</string>
-    <string name="post_video_text">Enter YouTube video URL link</string>
+    <string name="app_name">NMedia</string>
+    <string name="hello">Hello World!</string>
+    <string name="description_post_author_avatar">Post author avatar</string>
+    <string name="description_post_menu">Post menu</string>
+    <string name="description_post_like">Like</string>
+    <string name="description_post_share">Share</string>
+    <string name="description_post_save">Save</string>
+    <string name="menu_remove">Remove</string>
+    <string name="post_text">Post Text</string>
+    <string name="menu_edit">Edit</string>
+    <string name="error_empty_content">Content can\'t be empty</string>
+    <string name="chooser_share_post">Share post</string>
+    <string name="add_post">Add post</string>
+    <string name="retry_loading">Retry</string>
+    <string name="empty_posts">There are no posts.\nIf you create a new post, it will appear here</string>
+    <string name="error_loading">Error loading data</string>
+    <string name="save">Save</string>
+    <string name="google_play_unavailable">Google Api Unavailable</string>
+    <string name="notification_user_liked">User %1$s liked %2$s\'s post</string>
     <string name="channel_remote_name">Server notifications</string>
-    <string name="notification_user_liked" translatable="false">User %1$s liked post of %2$s</string>
-    <string name="notification_post_created" translatable="false">User %1$s published new post</string>
-    <string name="something_went_wrong">Something went wrong</string>
-    <string name="retry">Retry</string>
-    <string name="no_posts_in_feed">No posts in feed.</string>
+    <string name="channel_remote_description">Notifications from remote server</string>
+    <string name="description_post_retry">Press to try and upload again</string>
 </resources>

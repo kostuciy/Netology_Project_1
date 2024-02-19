@@ -2,38 +2,28 @@ package ru.netology.nmedia.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ru.netology.nmedia.data_transfer_object.Post
-import ru.netology.nmedia.data_transfer_object.VideoAttachment
+import ru.netology.nmedia.dto.Post
 
 @Entity
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
     val author: String,
-    val publishedDate: String,
+    val authorAvatar: String,
     val content: String,
-    val likes: Int,
-    val shares: Int,
-    val views: Int,
+    val published: String,
     val likedByMe: Boolean,
-    val videoAttachment: String? = null,
+    val likes: Int = 0,
+    val wasUploaded: Boolean = true
 ) {
-
-    fun toDto(): Post = with(this) {
-        Post(
-            id = id, author = author, published = publishedDate,
-            content = content, likes = likes, shares = shares,
-            views = views, likedByMe = likedByMe, videoAttachment = videoAttachment?.let { VideoAttachment(it) }
-        )
-    }
+    fun toDto() = Post(id, author, authorAvatar, content, published, likedByMe, likes)
 
     companion object {
-        fun fromDto(dto: Post): PostEntity = with(dto) {
-            PostEntity(
-                id = id, author = author, publishedDate = published,
-                content = content, likes = likes, shares = shares,
-                views = views, likedByMe = likedByMe, videoAttachment = videoAttachment?.link
-            )
-        }
+        fun fromDto(dto: Post) =
+            PostEntity(dto.id, dto.author, dto.authorAvatar, dto.content, dto.published, dto.likedByMe, dto.likes)
+
     }
 }
+
+fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
+fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)
