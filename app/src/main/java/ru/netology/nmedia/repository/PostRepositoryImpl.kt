@@ -28,7 +28,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 throw ApiError(response.code(), response.message())
             }
 
-            val body = response.body() ?: throw ApiError(response.code(), response.message())////////////////////////////////////////////
+            val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity())
         } catch (e: IOException) {
             throw NetworkError
@@ -43,7 +43,8 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             val response = PostsApi.service.getNewer(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
 
-            val body = response.body() ?: throw ApiError(response.code(), response.message())
+            val body = response.body()/*?.map { it.copy(onScreen = false) } */
+                ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity())
             emit(body.size)
         }

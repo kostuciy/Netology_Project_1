@@ -75,25 +75,23 @@ class FeedFragment : Fragment() {
         }
 //        changes ui depending on list of posts change in db
         viewModel.data.observe(viewLifecycleOwner) { postData ->
-            adapter.submitList(postData.posts)
+            adapter.submitList(postData.posts/*.filter { it.onScreen }*/)
             binding.emptyText.isVisible = postData.empty
         }
 
         viewModel.newerCount.observe(viewLifecycleOwner) { newPostsAmount ->
-            if (newPostsAmount > 0) {
-                binding.refreshButton.text = "Update to see $newPostsAmount new post(s)"
+            if (newPostsAmount > 0)
                 binding.refreshButton.visibility = View.VISIBLE
-            }
         }
 
         binding.refreshButton.setOnClickListener {
             viewModel.refreshPosts()
+            binding.list.scrollToPosition(0)
             it.visibility = View.GONE
         }
 
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refreshPosts()
-            binding.list.scrollToPosition(0)
             binding.refreshButton.visibility = View.GONE
         }
 
