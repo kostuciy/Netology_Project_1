@@ -32,7 +32,7 @@ android {
         }
         debug {
             manifestPlaceholders["usesCleartextTraffic"] = true
-            buildConfigField("String", "BASE_URL", "\"https://10.0.2.2:9999\"")
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:9999\"")
         }
     }
 
