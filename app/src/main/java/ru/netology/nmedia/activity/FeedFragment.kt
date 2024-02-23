@@ -2,6 +2,7 @@ package ru.netology.nmedia.activity
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,6 +59,7 @@ class FeedFragment : Fragment() {
                 viewModel.save()
             }
         })
+
         binding.list.adapter = adapter
 //        changes ui depending on interaction with server (is loading or error occurring)
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
@@ -75,23 +77,30 @@ class FeedFragment : Fragment() {
         }
 //        changes ui depending on list of posts change in db
         viewModel.data.observe(viewLifecycleOwner) { postData ->
-            adapter.submitList(postData.posts/*.filter { it.onScreen }*/)
+            adapter.submitList(postData.posts.filter { it.onScreen })
             binding.emptyText.isVisible = postData.empty
         }
 
         viewModel.newerCount.observe(viewLifecycleOwner) { newPostsAmount ->
+            Log.d("GUG", "${newPostsAmount}")
             if (newPostsAmount > 0)
                 binding.refreshButton.visibility = View.VISIBLE
         }
 
         binding.refreshButton.setOnClickListener {
             viewModel.refreshPosts()
-            binding.list.scrollToPosition(0)
+//            binding.list.layoutManager?.startSmoothScroll(
+//                object : LinearSmoothScroller(context) {
+//                    override fun getVerticalSnapPreference(): Int = SNAP_TO_START
+//                }.apply { this.targetPosition = 0 }
+//            )
+            binding.list.smoothScrollToPosition(0)
             it.visibility = View.GONE
         }
 
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refreshPosts()
+            binding.list.smoothScrollToPosition(0)
             binding.refreshButton.visibility = View.GONE
         }
 

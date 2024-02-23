@@ -1,5 +1,6 @@
 package ru.netology.nmedia.repository
 
+import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -30,6 +31,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity())
+            dao.updateVisibility() // changes all posts to visible
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Exception) {
@@ -38,15 +40,16 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override fun getNewerCount(id: Long): Flow<Int> = flow {
+        Log.d("GUG", "$id")
         while (true) {
             delay(10_000L)
             val response = PostsApi.service.getNewer(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
 
-            val body = response.body()/*?.map { it.copy(onScreen = false) } */
+            val body = response.body()?.map { it.copy(onScreen = false) }
                 ?: throw ApiError(response.code(), response.message())
             dao.insert(body.toEntity())
-            emit(body.size)
+            emit(body.size) // returns new posts' ids
         }
     }
         .catch { e -> e.printStackTrace() }
@@ -68,7 +71,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
             val body = response.body() ?: throw ApiError(response.code(), response.message())
             dao.removeById(Long.MAX_VALUE) // removing locally saved post
-            dao.insert(PostEntity.fromDto(body))
+            dao.insert(PostEntity.fromDto(body).copy(onScreen = true))
         } catch (e: IOException) {
             throw NetworkError
         } catch (e: Error) {

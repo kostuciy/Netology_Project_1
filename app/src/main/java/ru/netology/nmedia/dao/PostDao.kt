@@ -9,13 +9,14 @@ import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
-    @Query("SELECT * FROM PostEntity WHERE onScreen == 1 ORDER BY id DESC")
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
 
     @Query("SELECT COUNT(*) == 0 FROM PostEntity")
     suspend fun isEmpty(): Boolean
 
-//    @Query("SELECT * FROM PostEntity WHERE onScreen == 0")
+    @Query("UPDATE PostEntity SET onScreen = 1")
+    suspend fun updateVisibility()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
