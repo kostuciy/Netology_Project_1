@@ -10,6 +10,7 @@ import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
@@ -54,6 +55,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val postCreated: LiveData<Unit>
         get() = _postCreated
 
+    private val _photo = MutableLiveData<PhotoModel?>(null)
+    val photo: LiveData<PhotoModel?>
+        get() = _photo
+
 //    both map and switchMap result changes when underlying live data changes,
 //    but switchMap is more suited for time-consuming operations
 //    (flows from getNewerCount get disposed when list of posts changes
@@ -97,7 +102,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 try {
 //                    causes chain reaction of LiveData's from db to repository to view model
 //                    which causes observer to update UI
-                    repository.save(it)
+                    repository.save(it, _photo.value)
                     _dataState.value = FeedModelState()
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState(error = true)
@@ -109,6 +114,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun edit(post: Post) {
         edited.value = post
+    }
+
+    fun savePhoto(photoModel: PhotoModel) {
+        _photo.value = photoModel
+    }
+
+    fun clearPhoto() {
+        _photo.value = null
     }
 
     fun changeContent(content: String) {
@@ -129,10 +142,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun removeById(id: Long) {
+    fun removeById(post: Post) {
         viewModelScope.launch {
             try {
-                repository.removeById(id)
+                repository.removeById(post)
             } catch (e: Exception) {
                 _dataState.value = FeedModelState(error = true)
             }

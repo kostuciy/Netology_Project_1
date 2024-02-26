@@ -23,4 +23,5 @@
     <string name="channel_remote_description">Уведомления с удалённого сервера</string>
     <string name="description_post_retry">Нажмите, чтобы переотправить пост</string>
     <string name="new_posts_refresh">Свежие посты</string>
+    <string name="clear">Очистить</string>
 </resources>

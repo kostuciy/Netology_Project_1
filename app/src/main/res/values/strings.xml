@@ -22,4 +22,5 @@
     <string name="channel_remote_description">Notifications from remote server</string>
     <string name="description_post_retry">Press to try and upload again</string>
     <string name="new_posts_refresh">New posts</string>
+    <string name="clear">Clear</string>
 </resources>
