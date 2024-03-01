@@ -88,7 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="content" />
+            app:constraint_referenced_ids="image_attachment" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/like"
@@ -129,5 +129,18 @@
             app:icon="@drawable/ic_share_24"
             style="@style/Widget.AppTheme.IconButton"
             />
+
+        <ImageView
+            android:id="@+id/image_attachment"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="@+id/content"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="@+id/content"
+            app:layout_constraintTop_toBottomOf="@+id/content"
+            tools:srcCompat="@tools:sample/avatars" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -109,7 +109,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         return response.body() ?: throw ApiError(response.code(), response.message())
     }
 
-//    removing post from database (causes ui to update) and then from server
+    //    removing post from database (causes ui to update) and then from server
     override suspend fun removeById(post: Post) {
         dao.removeById(post.id)
         try {

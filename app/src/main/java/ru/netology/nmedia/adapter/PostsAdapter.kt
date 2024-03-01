@@ -4,6 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +14,7 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.view.loadCircleCrop
+import ru.netology.nmedia.view.loadImageAttachment
 
 interface OnInteractionListener {
     fun onLike(post: Post) {}
@@ -20,6 +23,8 @@ interface OnInteractionListener {
     fun onShare(post: Post) {}
 
     fun onRetry(post: Post)
+
+    fun onImageClick(imageUrl: String)
 }
 
 class PostsAdapter(
@@ -58,6 +63,17 @@ class PostViewHolder(
             retry.visibility = View.GONE
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
+
+            if (post.attachment != null) {
+                imageAttachment.apply {
+                    isVisible = true
+                    loadImageAttachment(post.attachment.url)
+                    setOnClickListener {
+                        onInteractionListener.onImageClick(post.attachment.url)
+                    }
+                }
+
+            } else imageAttachment.isGone = true
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {

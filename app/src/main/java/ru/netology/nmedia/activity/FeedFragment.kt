@@ -58,6 +58,13 @@ class FeedFragment : Fragment() {
                 viewModel.edit(post)
                 viewModel.save()
             }
+
+            override fun onImageClick(imageUrl: String) {
+                val action = FeedFragmentDirections
+                        .actionFeedFragmentToImageFragment()
+                        .setImageUrl(imageUrl)
+                findNavController().navigate(action)
+            }
         })
 
         binding.list.adapter = adapter
@@ -66,7 +73,6 @@ class FeedFragment : Fragment() {
             binding.progress.isVisible = state.loading
             binding.swiperefresh.isRefreshing = state.refreshing
             if (state.error) {
-                binding.fab.visibility = View.GONE
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry_loading) {
                         viewModel.loadPosts()
@@ -77,7 +83,13 @@ class FeedFragment : Fragment() {
         }
 //        changes ui depending on list of posts change in db
         viewModel.data.observe(viewLifecycleOwner) { postData ->
+            val newPost =
+                adapter.currentList.size > postData.posts.filter { it.onScreen }.size
             adapter.submitList(postData.posts.filter { it.onScreen })
+            if (newPost) {
+                binding.list.smoothScrollToPosition(0)
+            }
+
             binding.emptyText.isVisible = postData.empty
         }
 
@@ -89,18 +101,12 @@ class FeedFragment : Fragment() {
 
         binding.refreshButton.setOnClickListener {
             viewModel.refreshPosts()
-//            binding.list.layoutManager?.startSmoothScroll(
-//                object : LinearSmoothScroller(context) {
-//                    override fun getVerticalSnapPreference(): Int = SNAP_TO_START
-//                }.apply { this.targetPosition = 0 }
-//            )
             binding.list.smoothScrollToPosition(0)
             it.visibility = View.GONE
         }
 
         binding.swiperefresh.setOnRefreshListener {
             viewModel.refreshPosts()
-            binding.list.smoothScrollToPosition(0)
             binding.refreshButton.visibility = View.GONE
         }
 

@@ -124,6 +124,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         _photo.value = null
     }
 
+
     fun changeContent(content: String) {
         val text = content.trim()
         if (edited.value?.content == text) {

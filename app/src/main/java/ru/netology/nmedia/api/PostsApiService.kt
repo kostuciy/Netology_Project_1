@@ -10,8 +10,9 @@ import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import java.net.URI
 
-private val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
+private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
 
 private val logging = HttpLoggingInterceptor().apply {
     if (BuildConfig.DEBUG) {
@@ -55,6 +56,9 @@ interface PostsApiService {
     @Multipart
     @POST("media")
     suspend fun upload(@Part file: MultipartBody.Part): Response<Media>
+
+    @GET("$BASE_URL/media/{url}")
+    suspend fun getImageAttachment(@Path("url") url: String): Response<URI>
 }
 
 object PostsApi {
