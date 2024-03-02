@@ -89,7 +89,8 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                         TODO()
                     }
                     R.id.signout -> {
-                        TODO()
+                        viewModel.signOut()
+                        true
                     }
                     else -> false
                 }

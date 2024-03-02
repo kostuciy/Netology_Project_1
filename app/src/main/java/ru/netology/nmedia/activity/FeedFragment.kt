@@ -37,7 +37,9 @@ class FeedFragment : Fragment() {
             }
 
             override fun onLike(post: Post) {
-                postViewModel.likeById(post)
+                if (authViewModel.authenticated)
+                    postViewModel.likeById(post)
+                else findNavController().navigate(R.id.action_feedFragment_to_signInDialog)
             }
 
             override fun onRemove(post: Post) {
@@ -68,6 +70,7 @@ class FeedFragment : Fragment() {
                 findNavController().navigate(action)
             }
         })
+//        val signInDialog = object
 
         binding.apply {
             list.adapter = adapter
@@ -83,7 +86,11 @@ class FeedFragment : Fragment() {
                 binding.refreshButton.visibility = View.GONE
             }
             fab.setOnClickListener {
-                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+                findNavController().navigate(
+                    if (authViewModel.authenticated)
+                        R.id.action_feedFragment_to_newPostFragment
+                    else R.id.action_feedFragment_to_signInDialog
+                )
             }
         }
 

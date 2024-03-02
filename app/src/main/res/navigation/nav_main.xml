@@ -26,6 +26,9 @@
                 android:defaultValue="@null"
                 app:nullable="true" />
         </action>
+        <action
+            android:id="@+id/action_feedFragment_to_signInDialog"
+            app:destination="@id/signInDialog" />
 
     </fragment>
     <fragment
@@ -48,4 +51,12 @@
         android:name="ru.netology.nmedia.activity.SignInFragment"
         android:label="fragment_sign_in"
         tools:layout="@layout/fragment_sign_in" />
+    <dialog
+        android:id="@+id/signInDialog"
+        android:name="ru.netology.nmedia.dialog.SignInDialog"
+        android:label="SignInDialog" >
+        <action
+            android:id="@+id/action_signInDialog_to_signInFragment"
+            app:destination="@id/signInFragment" />
+    </dialog>
 </navigation>
