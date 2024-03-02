@@ -25,4 +25,11 @@
     <string name="new_posts_refresh">Свежие посты</string>
     <string name="clear">Очистить</string>
     <string name="error_image_load">Ошибка: не удалось загрузить изображение</string>
+    <string name="sign_in">Войти</string>
+    <string name="sign_up">Зарегистрироваться</string>
+    <string name="sign_out">Выйти</string>
+    <string name="hint_login">Логин</string>
+    <string name="hint_password">Пароль</string>
+    <string name="hint_sign_in">Введите логин и пароль</string>
+    <string name="error_sign_in">Ошибка: нет соединенеия или неверный пароль</string>
 </resources>

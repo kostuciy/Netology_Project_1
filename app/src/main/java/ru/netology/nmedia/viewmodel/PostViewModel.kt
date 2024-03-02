@@ -3,9 +3,11 @@ package ru.netology.nmedia.viewmodel
 import android.app.Application
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
@@ -17,6 +19,7 @@ import ru.netology.nmedia.util.SingleLiveEvent
 
 private val empty = Post(
     id = 0,
+    authorId = 0,
     content = "",
     author = "",
     authorAvatar = "",
@@ -40,10 +43,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //    (flow starts as .asLiveData() has terminal operator that starts its work)
 //    so data in VM receives those changes (like normal liveData), which results
 //    in constant update of postList (and ui because of observable) controlled by server
-    val data: LiveData<FeedModel> = repository.data
-        .map(::FeedModel)
-        .catch { e -> e.printStackTrace() }
-        .asLiveData()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val data: LiveData<FeedModel> = AppAuth.getInstance()
+        .authState
+        .flatMapLatest { auth ->
+            repository.data.map { posts ->
+                FeedModel(
+                    posts.map { it.copy(ownedByMe = auth.id == it.authorId) },
+                    posts.isEmpty()
+                )
+            }
+        }.asLiveData()
+
 //    has info about current app state while interacting with server
 //    (if error occurred, or if posts are still loading from server)
     private val _dataState = MutableLiveData<FeedModelState>()

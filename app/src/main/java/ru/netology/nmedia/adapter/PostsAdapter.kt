@@ -94,7 +94,7 @@ class PostViewHolder(
                     }
                 }.show()
             }
-            menu.visibility = View.VISIBLE
+            menu.isVisible = post.ownedByMe
 
             like.setOnClickListener {
                 onInteractionListener.onLike(post)

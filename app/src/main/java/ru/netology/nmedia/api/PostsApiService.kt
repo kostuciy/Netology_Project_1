@@ -8,6 +8,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.*
 import ru.netology.nmedia.BuildConfig
+import ru.netology.nmedia.auth.AppAuth
+import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import java.net.URI
@@ -21,6 +23,16 @@ private val logging = HttpLoggingInterceptor().apply {
 }
 
 private val okhttp = OkHttpClient.Builder()
+//    adds header with token to every request
+    .addInterceptor { chain ->
+        AppAuth.getInstance().authState.value.token?.let { token ->
+            val newRequest = chain.request().newBuilder()
+                .addHeader("Authorization", token)
+                .build()
+            return@addInterceptor chain.proceed(newRequest)
+        }
+        chain.proceed(chain.request())
+    }
     .addInterceptor(logging)
     .build()
 
@@ -59,6 +71,13 @@ interface PostsApiService {
 
     @GET("$BASE_URL/media/{url}")
     suspend fun getImageAttachment(@Path("url") url: String): Response<URI>
+
+    @FormUrlEncoded
+    @POST("users/authentication")
+    suspend fun authenticate(
+        @Field("login") login: String,
+        @Field("pass") password: String
+    ): Response<AuthState>
 }
 
 object PostsApi {
