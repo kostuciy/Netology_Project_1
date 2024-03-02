@@ -15,11 +15,14 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.viewmodel.AuthViewModel
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
 
-    private val viewModel: PostViewModel by activityViewModels()
+    private val postViewModel: PostViewModel by activityViewModels()
+    private val authViewModel: AuthViewModel by activityViewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,15 +33,15 @@ class FeedFragment : Fragment() {
 
         val adapter = PostsAdapter(object : OnInteractionListener {
             override fun onEdit(post: Post) {
-                viewModel.edit(post)
+                postViewModel.edit(post)
             }
 
             override fun onLike(post: Post) {
-                viewModel.likeById(post)
+                postViewModel.likeById(post)
             }
 
             override fun onRemove(post: Post) {
-                viewModel.removeById(post)
+                postViewModel.removeById(post)
             }
 
             override fun onShare(post: Post) {
@@ -54,8 +57,8 @@ class FeedFragment : Fragment() {
             }
 
             override fun onRetry(post: Post) {
-                viewModel.edit(post)
-                viewModel.save()
+                postViewModel.edit(post)
+                postViewModel.save()
             }
 
             override fun onImageClick(imageUrl: String) {
@@ -66,51 +69,53 @@ class FeedFragment : Fragment() {
             }
         })
 
-        binding.list.adapter = adapter
-//        changes ui depending on interaction with server (is loading or error occurring)
-        viewModel.dataState.observe(viewLifecycleOwner) { state ->
-            binding.progress.isVisible = state.loading
-            binding.swiperefresh.isRefreshing = state.refreshing
-            if (state.error) {
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) {
-                        viewModel.loadPosts()
-                        binding.fab.visibility = View.VISIBLE
-                    }
-                    .show()
-            }
-        }
-//        changes ui depending on list of posts change in db
-        viewModel.data.observe(viewLifecycleOwner) { postData ->
-            val newPost =
-                adapter.currentList.size > postData.posts.filter { it.onScreen }.size
-            adapter.submitList(postData.posts.filter { it.onScreen })
-            if (newPost) {
+        binding.apply {
+            list.adapter = adapter
+            fab.isVisible = authViewModel.authenticated
+
+            refreshButton.setOnClickListener {
+                postViewModel.refreshPosts()
                 binding.list.smoothScrollToPosition(0)
+                it.visibility = View.GONE
             }
-
-            binding.emptyText.isVisible = postData.empty
+            swiperefresh.setOnRefreshListener {
+                postViewModel.refreshPosts()
+                binding.refreshButton.visibility = View.GONE
+            }
+            fab.setOnClickListener {
+                findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            }
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) { newPostsAmount ->
-            if (newPostsAmount > 0)
-                binding.refreshButton.visibility = View.VISIBLE
+        postViewModel.apply {
+            dataState.observe(viewLifecycleOwner) { state ->
+                binding.progress.isVisible = state.loading
+                binding.swiperefresh.isRefreshing = state.refreshing
+                if (state.error) {
+                    Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.retry_loading) {
+                            postViewModel.loadPosts()
+                            binding.fab.visibility = View.VISIBLE
+                        }
+                        .show()
+                }
+            }
+            data.observe(viewLifecycleOwner) { postData ->
+                val newPost =
+                    adapter.currentList.size > postData.posts.filter { it.onScreen }.size
+                adapter.submitList(postData.posts.filter { it.onScreen })
+                if (newPost) {
+                    binding.list.smoothScrollToPosition(0)
+                }
+
+                binding.emptyText.isVisible = postData.empty
+            }
+            newerCount.observe(viewLifecycleOwner) { newPostsAmount ->
+                if (newPostsAmount > 0)
+                    binding.refreshButton.visibility = View.VISIBLE
+            }
         }
 
-        binding.refreshButton.setOnClickListener {
-            viewModel.refreshPosts()
-            binding.list.smoothScrollToPosition(0)
-            it.visibility = View.GONE
-        }
-
-        binding.swiperefresh.setOnRefreshListener {
-            viewModel.refreshPosts()
-            binding.refreshButton.visibility = View.GONE
-        }
-
-        binding.fab.setOnClickListener {
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-        }
 
         return binding.root
     }
