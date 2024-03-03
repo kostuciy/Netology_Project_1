@@ -83,10 +83,13 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 return when (menuItem.itemId) {
                     R.id.signin -> {
                         navController.navigate(R.id.signInFragment)
+//                        navController.popBackStack(R.id.signInFragment, true)
                         true
                     }
                     R.id.signup -> {
-                        TODO()
+//                        navController.popBackStack(R.id.signUpFragment, true)
+                        navController.navigate(R.id.signUpFragment)
+                        true
                     }
                     R.id.signout -> {
                         viewModel.signOut()

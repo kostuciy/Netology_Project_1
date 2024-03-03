@@ -2,6 +2,7 @@ package ru.netology.nmedia.api
 
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -12,7 +13,6 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
-import java.net.URI
 
 private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
 
@@ -69,14 +69,31 @@ interface PostsApiService {
     @POST("media")
     suspend fun upload(@Part file: MultipartBody.Part): Response<Media>
 
-    @GET("$BASE_URL/media/{url}")
-    suspend fun getImageAttachment(@Path("url") url: String): Response<URI>
+//    @GET("$BASE_URL/media/{url}")
+//    suspend fun getImageAttachment(@Path("url") url: String): Response<URI> TODO: remove
 
     @FormUrlEncoded
     @POST("users/authentication")
     suspend fun authenticate(
         @Field("login") login: String,
         @Field("pass") password: String
+    ): Response<AuthState>
+
+    @FormUrlEncoded
+    @POST("users/registration")
+    suspend fun register(
+        @Field("login") login: String,
+        @Field("pass") password: String,
+        @Field("name") name: String
+    ): Response<AuthState>
+
+    @Multipart
+    @POST("users/registration")
+    suspend fun registerWithAvatar(
+        @Part("login") login: RequestBody,
+        @Part("pass") password: RequestBody,
+        @Part("name") name: RequestBody,
+        @Part media: MultipartBody.Part,
     ): Response<AuthState>
 }
 

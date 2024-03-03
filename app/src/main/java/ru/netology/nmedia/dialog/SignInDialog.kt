@@ -14,6 +14,7 @@ class SignInDialog : DialogFragment() {
 
             builder.setMessage(getString(R.string.dialog_sign_in))
                 .setPositiveButton(getString(R.string.dialog_sign_in_yes)) { dialog, id ->
+//                    findNavController().popBackStack(R.id.signInFragment, true)
                     findNavController().navigate(R.id.signInFragment)
                 }
                 .setNegativeButton(getString(R.string.dialog_sign_in_no)) { dialog, id ->

@@ -1,13 +1,17 @@
 package ru.netology.nmedia.repository
 
+import android.net.Uri
 import android.util.Log
+import androidx.core.net.toFile
 import androidx.lifecycle.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import okio.IOException
 import kotlinx.coroutines.flow.*
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import ru.netology.nmedia.api.*
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dao.PostDao
@@ -153,6 +157,31 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             try {
                 val response =
                     PostsApi.service.authenticate(login, password)
+                if (!response.isSuccessful)
+                    throw ApiError(response.code(), response.message())
+
+                return response.body() ?: throw ApiError(response.code(), response.message())
+            } catch(e: IOException) {
+                throw NetworkError
+            } catch(e: Exception) {
+                throw UnknownError
+            }
+        }
+
+        suspend fun register(login: String, password: String, name: String, media: Uri?): AuthState {
+            try {
+                val response =
+                    if (media == null) PostsApi.service.register(login, password, name)
+                    else PostsApi.service.registerWithAvatar(
+                        login.toRequestBody("text/plain".toMediaType()),
+                        password.toRequestBody("text/plain".toMediaType()),
+                        name.toRequestBody("text/plain".toMediaType()),
+                        MultipartBody.Part.createFormData(
+                            "file",
+                            media.toFile().name, // TODO: maybe use user name as file name?
+                            media.toFile().asRequestBody())
+                    )
+
                 if (!response.isSuccessful)
                     throw ApiError(response.code(), response.message())
 

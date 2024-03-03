@@ -35,4 +35,7 @@
     <string name="dialog_sign_in">Необходим вход для выполнения операции</string>
     <string name="dialog_sign_in_yes">Войти</string>
     <string name="dialog_sign_in_no">Не сейчас</string>
+    <string name="hint_sign_up">Введите имя, логин и пароль</string>
+    <string name="hint_password_confirm">Подтверждение пароля</string>
+    <string name="name">Имя</string>
 </resources>

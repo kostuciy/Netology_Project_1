@@ -3,6 +3,7 @@ package ru.netology.nmedia.activity
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -15,10 +16,10 @@ import androidx.navigation.fragment.findNavController
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSignInBinding
-import ru.netology.nmedia.viewmodel.SignInViewModel
+import ru.netology.nmedia.viewmodel.SignViewModel
 
 class SignInFragment : Fragment() {
-    private val viewModel: SignInViewModel by activityViewModels()
+    private val viewModel: SignViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -26,6 +27,8 @@ class SignInFragment : Fragment() {
     ): View? {
         val binding =
             FragmentSignInBinding.inflate(inflater, container, false)
+
+
 
         binding.apply {
             showPassword.setOnClickListener {
@@ -39,6 +42,11 @@ class SignInFragment : Fragment() {
                     login.text.toString(),
                     password.text.toString()
                 )
+            }
+            toSignUp.setOnClickListener {
+                findNavController().navigate(R.id.action_signInFragment_to_signUpFragment)
+//                TODO: somehow remove from backstack
+//                findNavController().popBackStack(R.id.signUpFragment, true)
             }
         }
 
@@ -59,9 +67,7 @@ class SignInFragment : Fragment() {
                             binding.login.isEnabled = true
                         }
                         state.signedIn -> {
-//                            findNavController().navigate(R.id.feedFragment)
                             findNavController().navigateUp()
-                            viewModel.toDefault()
                         }
                     }
                 }
@@ -69,6 +75,13 @@ class SignInFragment : Fragment() {
         }
 
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.d("SignState", "Last state - ${viewModel.state.value}")
+        viewModel.toDefault()
+        Log.d("SignState", "After view destruction - ${viewModel.state.value}")
     }
 
 

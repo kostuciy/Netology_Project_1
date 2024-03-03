@@ -50,7 +50,11 @@
         android:id="@+id/signInFragment"
         android:name="ru.netology.nmedia.activity.SignInFragment"
         android:label="fragment_sign_in"
-        tools:layout="@layout/fragment_sign_in" />
+        tools:layout="@layout/fragment_sign_in" >
+        <action
+            android:id="@+id/action_signInFragment_to_signUpFragment"
+            app:destination="@id/signUpFragment" />
+    </fragment>
     <dialog
         android:id="@+id/signInDialog"
         android:name="ru.netology.nmedia.dialog.SignInDialog"
@@ -59,4 +63,13 @@
             android:id="@+id/action_signInDialog_to_signInFragment"
             app:destination="@id/signInFragment" />
     </dialog>
+    <fragment
+        android:id="@+id/signUpFragment"
+        android:name="ru.netology.nmedia.activity.SignUpFragment"
+        android:label="fragment_sign_up"
+        tools:layout="@layout/fragment_sign_up" >
+        <action
+            android:id="@+id/action_signUpFragment_to_feedFragment"
+            app:destination="@id/feedFragment" />
+    </fragment>
 </navigation>
