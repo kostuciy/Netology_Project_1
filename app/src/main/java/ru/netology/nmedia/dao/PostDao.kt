@@ -1,25 +1,31 @@
 package ru.netology.nmedia.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.entity.PostEntity
 
 @Dao
 interface PostDao {
-
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
-    fun getAll(): LiveData<List<PostEntity>>
+    fun getAll(): Flow<List<PostEntity>>
 
-    @Insert
-    fun insert(post: PostEntity)
+    @Query("SELECT COUNT(*) == 0 FROM PostEntity")
+    suspend fun isEmpty(): Boolean
 
-    @Query("UPDATE PostEntity SET content = :content WHERE id = :id")
-    fun changeContentById(id: Long, content: String)
+    @Query("UPDATE PostEntity SET onScreen = 1")
+    suspend fun updateVisibility()
 
-    @Query("UPDATE PostEntity SET videoAttachment = :videoLink WHERE id = :id")
-    fun changeVideoAttachmentById(id: Long, videoLink: String?)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(post: PostEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(posts: List<PostEntity>)
+
+    @Query("DELETE FROM PostEntity WHERE id = :id")
+    suspend fun removeById(id: Long)
 
     @Query(
         """
@@ -29,25 +35,5 @@ interface PostDao {
         WHERE id = :id
     """
     )
-    fun updateLikesById(id: Long)
-
-    @Query(
-        """
-        UPDATE PostEntity SET
-        shares = shares + 1
-        WHERE id = :id
-    """
-    )
-    fun updateSharesById(id: Long)
-
-    @Query("DELETE FROM PostEntity WHERE id = :id")
-    fun deleteById(id: Long)
-
-    //
-    fun savePost(post: PostEntity) =
-        if (post.id == 0L) insert(post) // id = 0 => new post, that needs to be added
-        else with(post) {// other posts - already existing ones, that need to be updated in db
-            changeContentById(post.id, post.content)
-            changeVideoAttachmentById(post.id, post.videoAttachment)
-        }
+    suspend fun updateLikesById(id: Long)
 }

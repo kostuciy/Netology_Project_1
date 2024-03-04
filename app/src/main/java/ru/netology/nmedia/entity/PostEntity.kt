@@ -1,39 +1,42 @@
 package ru.netology.nmedia.entity
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import ru.netology.nmedia.data_transfer_object.Post
-import ru.netology.nmedia.data_transfer_object.VideoAttachment
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.Post
 
 @Entity
 data class PostEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long,
+    val authorId: Long,
     val author: String,
-    val publishedDate: String,
+    val authorAvatar: String,
     val content: String,
-    val likes: Int,
-    val shares: Int,
-    val views: Int,
+    val published: String,
     val likedByMe: Boolean,
-    val videoAttachment: String? = null,
+    val likes: Int = 0,
+    val onScreen: Boolean = true,
+    @Embedded
+    val attachment: Attachment? = null
 ) {
-
-    fun toDto(): Post = with(this) {
-        Post(
-            id = id, author = author, publishedDate = publishedDate,
-            content = content, likes = likes, shares = shares,
-            views = views, likedByMe = likedByMe, videoAttachment = videoAttachment?.let { VideoAttachment(it) }
-        )
-    }
+    fun toDto() = Post(
+        id, authorId, author, authorAvatar,
+        content, published, likedByMe,
+        likes, attachment, onScreen
+    )
 
     companion object {
-        fun fromDto(dto: Post): PostEntity = with(dto) {
+        fun fromDto(dto: Post) =
             PostEntity(
-                id = id, author = author, publishedDate = publishedDate,
-                content = content, likes = likes, shares = shares,
-                views = views, likedByMe = likedByMe, videoAttachment = videoAttachment?.link
+                dto.id, dto.authorId, dto.author, dto.authorAvatar,
+                dto.content, dto.published, dto.likedByMe,
+                dto.likes, dto.onScreen, dto.attachment
             )
-        }
+
     }
 }
+
+fun List<PostEntity>.toDto(): List<Post> = map(PostEntity::toDto)
+fun List<Post>.toEntity(): List<PostEntity> = map(PostEntity::fromDto)
