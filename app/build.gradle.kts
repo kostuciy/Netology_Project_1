@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.gms.google-services")
     id("androidx.navigation.safeargs")
+    id("com.google.dagger.hilt.android")
     }
 
 android {
@@ -73,6 +74,7 @@ dependencies {
     val coroutines_version = "1.7.3"
     val play_services_base_version = "18.1.0"
     val image_picker_version = "2.1"
+    val hilt_version = "2.44"
 
 //    implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation("androidx.core:core-ktx:$core_version")
@@ -102,8 +104,14 @@ dependencies {
     implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutines_version")
     implementation ("com.google.android.gms:play-services-base:$play_services_base_version")
     implementation("com.github.dhaval2404:imagepicker:$image_picker_version")
+    implementation("com.google.dagger:hilt-android:$hilt_version")
+    kapt("com.google.dagger:hilt-android-compiler:$hilt_version")
 
     testImplementation ("junit:junit:$junit_version")
     androidTestImplementation ("androidx.test.ext:junit:$ext_junit_version")
     androidTestImplementation ("androidx.test.espresso:espresso-core:$espresso_core_version")
+}
+
+kapt {
+    correctErrorTypes = true
 }

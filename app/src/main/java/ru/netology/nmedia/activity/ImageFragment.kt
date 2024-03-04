@@ -9,11 +9,13 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.databinding.FragmentImageBinding
 import ru.netology.nmedia.view.loadImageAttachment
 
+@AndroidEntryPoint
 class ImageFragment : Fragment() {
-    val arguments: ImageFragmentArgs by navArgs()
+    private val arguments: ImageFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

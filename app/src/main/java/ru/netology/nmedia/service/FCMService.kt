@@ -14,10 +14,15 @@ import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.random.Random
 
-
+@Singleton // TODO: check if needed
 class FCMService : FirebaseMessagingService() {
+    @Inject
+    lateinit var appAuth: AppAuth
+
     private val action = "action"
     private val content = "content"
     private val channelId = "remote"
@@ -47,7 +52,7 @@ class FCMService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        AppAuth.getInstance().sendPushToken(token)
+        appAuth.sendPushToken(token)
     }
 
     private fun handleLike(content: Like) {

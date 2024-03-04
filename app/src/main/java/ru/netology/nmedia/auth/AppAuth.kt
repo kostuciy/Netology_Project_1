@@ -3,16 +3,24 @@ package ru.netology.nmedia.auth
 import android.content.Context
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.qualifiers.ApplicationContext
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import ru.netology.nmedia.api.PostsApi
+import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.dto.PushToken
+import javax.inject.Inject
 
-class AppAuth private constructor(context: Context) {
+class AppAuth @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
     private val _authState = MutableStateFlow(
         AuthState(
@@ -60,11 +68,22 @@ class AppAuth private constructor(context: Context) {
         sendPushToken()
     }
 
+    @InstallIn(SingletonComponent::class)
+    @EntryPoint
+    interface AppAuthEntryPoint {
+
+        fun getApiService(): PostsApiService
+    }
+
     fun sendPushToken(token: String? = null) {
         CoroutineScope(Dispatchers.Default).launch {
             try {
                 val pushToken = PushToken(token ?: Firebase.messaging.token.await())
-                PostsApi.service.sendPushToken(pushToken)
+                val apiService =
+                    EntryPointAccessors
+                        .fromApplication(context, AppAuthEntryPoint::class.java)
+                        .getApiService()
+                apiService.sendPushToken(pushToken)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -72,20 +91,20 @@ class AppAuth private constructor(context: Context) {
     }
 
     companion object {
-        @Volatile // if used in multiple threads the changes in variables syncs between all of them
-        private var instance: AppAuth? = null
+//        @Volatile // if used in multiple threads the changes in variables syncs between all of them
+//        private var instance: AppAuth? = null
 
         private const val KEY_ID = "id"
         private const val KET_TOKEN = "token"
-
-        fun getInstance() = synchronized(this) {
-            instance ?: throw IllegalAccessException("AppAuth is not initialized.")
-        }
-
-        fun initAuth(context: Context) =
-            instance ?: synchronized(this) {
-                instance ?: AppAuth(context).also { instance = it }
-            }
+//
+//        fun getInstance() = synchronized(this) {
+//            instance ?: throw IllegalAccessException("AppAuth is not initialized.")
+//        }
+//
+//        fun initAuth(context: Context) =
+//            instance ?: synchronized(this) {
+//                instance ?: AppAuth(context).also { instance = it }
+//            }
     }
 }
 

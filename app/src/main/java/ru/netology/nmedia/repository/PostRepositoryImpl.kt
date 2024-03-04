@@ -27,8 +27,12 @@ import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import ru.netology.nmedia.model.PhotoModel
 import java.io.File
+import javax.inject.Inject
 
-class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
+class PostRepositoryImpl @Inject constructor(
+    private val dao: PostDao,
+) : PostRepository {
+    @Inject lateinit var apiService: PostsApiService
 //    link to dao LiveData with PostEntity list (transformed to LiveData of Posts)
     override val data =
         dao.getAll().map(List<PostEntity>::toDto).flowOn(Dispatchers.Main)
@@ -36,7 +40,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 //    loading posts from server with retrofit and adding to database if successful
     override suspend fun getAll() {
         try {
-            val response = PostsApi.service.getAll()
+            val response = apiService.getAll()
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -55,7 +59,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         Log.d("GUG", "$id")
         while (true) {
             delay(10_000L)
-            val response = PostsApi.service.getNewer(id)
+            val response = apiService.getNewer(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
 
             val body = response.body()?.map { it.copy(onScreen = false) }
@@ -83,7 +87,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 post
             }
 
-            val response = PostsApi.service.save(postWithAttachment)
+            val response = apiService.save(postWithAttachment)
             if (!response.isSuccessful) {
                 throw ApiError(response.code(), response.message())
             }
@@ -104,7 +108,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 //      -> attachment in post (media id and type saved as Attachment and attached to post,
 //      so server could find and load correct attachment to post)
     private suspend fun upload(file: File): Media {
-        val response = PostsApi.service.upload(
+        val response = apiService.upload(
             MultipartBody.Part.createFormData("file", file.name, file.asRequestBody())
         )
 
@@ -118,7 +122,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun removeById(post: Post) {
         dao.removeById(post.id)
         try {
-            val response = PostsApi.service.removeById(post.id)
+            val response = apiService.removeById(post.id)
             if (!response.isSuccessful || response.body() == null) {
                 dao.insert(PostEntity.fromDto(post))
                 throw ApiError(response.code(), response.message())
@@ -136,8 +140,8 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         dao.updateLikesById(post.id)
         try {
             val response =
-                if (post.likedByMe) PostsApi.service.dislikeById(post.id)
-                else PostsApi.service.likeById(post.id)
+                if (post.likedByMe) apiService.dislikeById(post.id)
+                else apiService.likeById(post.id)
             if (!response.isSuccessful || response.body() == null) {
                 dao.updateLikesById(post.id)
                 throw ApiError(response.code(), response.message())
@@ -151,46 +155,44 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    companion object Auth {
+    override suspend fun authenticate(login: String, password: String): AuthState {
+        try {
+            val response =
+                apiService.authenticate(login, password)
+            if (!response.isSuccessful)
+                throw ApiError(response.code(), response.message())
 
-        suspend fun authenticate(login: String, password: String): AuthState {
-            try {
-                val response =
-                    PostsApi.service.authenticate(login, password)
-                if (!response.isSuccessful)
-                    throw ApiError(response.code(), response.message())
-
-                return response.body() ?: throw ApiError(response.code(), response.message())
-            } catch(e: IOException) {
-                throw NetworkError
-            } catch(e: Exception) {
-                throw UnknownError
-            }
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
         }
+    }
 
-        suspend fun register(login: String, password: String, name: String, media: Uri?): AuthState {
-            try {
-                val response =
-                    if (media == null) PostsApi.service.register(login, password, name)
-                    else PostsApi.service.registerWithAvatar(
-                        login.toRequestBody("text/plain".toMediaType()),
-                        password.toRequestBody("text/plain".toMediaType()),
-                        name.toRequestBody("text/plain".toMediaType()),
-                        MultipartBody.Part.createFormData(
-                            "file",
-                            media.toFile().name, // TODO: maybe use user name as file name?
-                            media.toFile().asRequestBody())
+    override suspend fun register(login: String, password: String, name: String, media: Uri?): AuthState {
+        try {
+            val response =
+                if (media == null) apiService.register(login, password, name)
+                else apiService.registerWithAvatar(
+                    login.toRequestBody("text/plain".toMediaType()),
+                    password.toRequestBody("text/plain".toMediaType()),
+                    name.toRequestBody("text/plain".toMediaType()),
+                    MultipartBody.Part.createFormData(
+                        "file",
+                        media.toFile().name, // TODO: maybe use user name as file name?
+                        media.toFile().asRequestBody()
                     )
+                )
 
-                if (!response.isSuccessful)
-                    throw ApiError(response.code(), response.message())
+            if (!response.isSuccessful)
+                throw ApiError(response.code(), response.message())
 
-                return response.body() ?: throw ApiError(response.code(), response.message())
-            } catch(e: IOException) {
-                throw NetworkError
-            } catch(e: Exception) {
-                throw UnknownError
-            }
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            throw NetworkError
+        } catch (e: Exception) {
+            throw UnknownError
         }
     }
 }
