@@ -17,7 +17,9 @@ import kotlinx.coroutines.tasks.await
 import ru.netology.nmedia.api.PostsApiService
 import ru.netology.nmedia.dto.PushToken
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AppAuth @Inject constructor(
     @ApplicationContext private val context: Context
 ) {

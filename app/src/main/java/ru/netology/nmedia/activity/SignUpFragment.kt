@@ -124,6 +124,7 @@ class SignUpFragment : Fragment() {
                             }
                             state.signedIn -> {
                                 findNavController().navigateUp()
+                                Log.d("state", "register start -> ${viewModel.state.value}")
                             }
                         }
                     }
