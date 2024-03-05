@@ -13,13 +13,15 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
 
-@Singleton // TODO: check if needed
+@AndroidEntryPoint
+@Singleton
 class FCMService : FirebaseMessagingService() {
     @Inject
     lateinit var appAuth: AppAuth

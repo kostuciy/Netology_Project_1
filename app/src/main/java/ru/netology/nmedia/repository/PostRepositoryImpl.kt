@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.net.toFile
 import androidx.lifecycle.*
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import okio.IOException
